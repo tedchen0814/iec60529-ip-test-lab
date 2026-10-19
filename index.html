@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="zh-Hant" data-lang="both">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IP 防護測試實驗室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: 測試實驗室操作台 — 頂部是可點選的金屬銘牌解碼器，下方兩座「測試台」（畫布＋規格卡），最後是雙重標示、速查表與小測驗。語言：中文／English／雙語 三種模式 */
+:root{
+  --bg:#ECEFF1; --surface:#FFFFFF; --sunk:#E1E6E9; --ink:#14202A; --muted:#566571; --line:#C6CFD5; --steel:#7D8B96;
+  --water:#1D66C9; --water-soft:#D6E5F8; --dust:#A87420; --dust-soft:#F2E4CC; --hot:#C9412A;
+  --ok:#23845A; --bad:#C23B30;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-en:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1418; --surface:#162027; --sunk:#0B1014; --ink:#E3E9ED; --muted:#93A2AD; --line:#2A3742; --steel:#6E7E8A;
+  --water:#5AA2F2; --water-soft:#14304F; --dust:#D9A757; --dust-soft:#3A2C14; --hot:#F0694E;
+  --ok:#4CC08A; --bad:#F06A5E; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0E1418; --surface:#162027; --sunk:#0B1014; --ink:#E3E9ED; --muted:#93A2AD; --line:#2A3742; --steel:#6E7E8A;
+  --water:#5AA2F2; --water-soft:#14304F; --dust:#D9A757; --dust-soft:#3A2C14; --hot:#F0694E;
+  --ok:#4CC08A; --bad:#F06A5E; color-scheme:dark;}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1140px;margin:0 auto}
+h1,h2,h3{text-wrap:balance;line-height:1.25;margin:0}
+h2{font-size:1.6rem;font-weight:700}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+a{color:var(--water)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+
+/* language modes */
+.en{font-family:var(--f-en)}
+html[data-lang="zh"] .en{display:none}
+html[data-lang="en"] .zh{display:none}
+html[data-lang="en"] body{font-family:var(--f-en)}
+html[data-lang="both"] .en{display:block;font-size:.86em;color:var(--muted);font-weight:400;line-height:1.5;margin-top:2px}
+html[data-lang="both"] .en.i{display:inline;margin:0}
+html[data-lang="both"] .en.i::before{content:" · "}
+html[data-lang="both"] h1 .en,html[data-lang="both"] h2 .en{font-size:.62em;margin-top:6px}
+html[data-lang="both"] .en .en, html[data-lang="both"] .tab .en{font-size:.75rem}
+
+/* top bar */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.top .std{font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
+.topr{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+nav.toc{display:flex;gap:6px;flex-wrap:wrap}
+nav.toc a{font-size:.85rem;text-decoration:none;color:var(--ink);padding:4px 10px;border:1px solid var(--line);border-radius:999px;line-height:1.4}
+nav.toc a:hover{border-color:var(--ink)}
+html[data-lang="both"] nav.toc .en{display:none}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;padding-block:40px 32px;align-items:center}
+.hero > *{min-width:0}
+.hero h1{font-size:clamp(1.9rem,4vw,2.8rem);font-weight:700;letter-spacing:.01em}
+.hero .lede{margin-top:14px;color:var(--muted);max-width:36em}
+html[data-lang="both"] .hero .lede .en{color:var(--muted);opacity:.85;margin-top:8px}
+.plate{background:linear-gradient(160deg,var(--surface),var(--sunk));border:1px solid var(--line);border-radius:6px;padding:22px 22px 18px;position:relative}
+.plate::before,.plate::after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:var(--steel);top:10px;box-shadow:inset 0 0 0 2px var(--sunk)}
+.plate::before{left:10px}.plate::after{right:10px}
+.code{display:flex;align-items:baseline;justify-content:center;gap:4px;font-family:var(--f-display);font-weight:700;line-height:1;font-size:clamp(4.2rem,11vw,6.6rem);letter-spacing:.02em}
+.code .ip{color:var(--muted)}
+.code .d1{color:var(--dust)}
+.code .d2{color:var(--water)}
+.digits{display:grid;gap:10px;margin-top:14px}
+.drow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.drow .lab{font-size:.82rem;color:var(--muted);width:6.4em;flex:none;line-height:1.3}
+html[data-lang="both"] .drow .lab .en{font-size:.72rem}
+.dbtn{font-family:var(--f-display);font-weight:600;font-size:1.15rem;min-width:36px;height:36px;border:1px solid var(--line);background:var(--surface);border-radius:4px;cursor:pointer}
+.dbtn:hover{border-color:var(--ink)}
+.drow.solid .dbtn[aria-pressed="true"]{background:var(--dust);border-color:var(--dust);color:var(--surface)}
+.drow.water .dbtn[aria-pressed="true"]{background:var(--water);border-color:var(--water);color:var(--surface)}
+.meaning{margin-top:16px;display:grid;gap:8px;font-size:.92rem}
+.meaning > div{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.chip{font-family:var(--f-mono);font-size:.75rem;padding:1px 8px;border-radius:3px;white-space:nowrap}
+.chip.s{background:var(--dust-soft);color:var(--dust)}
+.chip.w{background:var(--water-soft);color:var(--water)}
+.jump{display:flex;gap:4px 14px;flex-wrap:wrap;margin-top:14px}
+.jump a{font-size:.85rem}
+
+/* sections */
+section{padding-block:36px;border-top:1px solid var(--line)}
+.shead{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:18px}
+.shead > div{min-width:0}
+.shead p{color:var(--muted);max-width:44em;margin-top:6px}
+
+/* bench */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:6px 12px;cursor:pointer;display:flex;gap:8px;align-items:baseline;text-align:left}
+.tab b{font-family:var(--f-display);font-size:1.2rem;font-weight:700}
+.tab > span{font-size:.8rem;color:var(--muted);line-height:1.3}
+.tab:hover{border-color:var(--ink)}
+#solidTabs .tab[aria-selected="true"]{border-color:var(--dust);box-shadow:inset 0 -3px 0 var(--dust)}
+#waterTabs .tab[aria-selected="true"]{border-color:var(--water);box-shadow:inset 0 -3px 0 var(--water)}
+.bench{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start}
+.bench > *{min-width:0}
+.screen{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+canvas{display:block;width:100%;aspect-ratio:800/420;max-width:100%;background:var(--surface)}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);background:var(--sunk);font-size:.88rem}
+.ctl label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctl input[type=range]{width:150px;accent-color:var(--ink)}
+.ctl .val{font-family:var(--f-mono);min-width:4.5em}
+html[data-lang="both"] .ctl .en{display:inline;margin:0 0 0 4px;font-size:.78rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:4px 10px;cursor:pointer;font-size:.85rem}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+html[data-lang="both"] .seg .en{display:inline;font-size:.75rem;margin-left:4px;color:inherit;opacity:.75}
+.play{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:4px 12px;cursor:pointer;font-size:.85rem}
+.play[data-paused="1"]{background:var(--ink);color:var(--surface);border-color:var(--ink);font-weight:700}
+html[data-lang="both"] .play .en{display:inline;margin-left:6px;color:inherit;opacity:.75;font-size:.78rem}
+.progress{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted);flex-wrap:wrap}
+.bar{flex:1;height:6px;background:var(--sunk);border-radius:3px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;width:0;background:var(--water)}
+#solidBench .bar i{background:var(--dust)}
+.spec{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px}
+.spec h3{font-size:1.25rem}
+.spec .method{color:var(--muted);font-size:.9rem;margin-top:4px}
+.spec dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:14px 0 0;font-size:.9rem}
+.spec dt{color:var(--muted);max-width:9em;line-height:1.4}
+.spec dd{margin:0;font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere;line-height:1.5}
+.spec dd .en{font-family:var(--f-mono)}
+.box{margin-top:14px;padding:10px 12px;border-radius:4px;font-size:.88rem;background:var(--sunk)}
+.box strong{display:block;font-size:.78rem;letter-spacing:.06em;color:var(--muted);margin-bottom:2px}
+.box strong .en{display:inline!important;margin-left:6px}
+.verdict{margin-top:14px;padding:10px 12px;border-radius:4px;font-size:.9rem;border:1px solid var(--line)}
+.verdict.pass{border-color:var(--ok)}
+.verdict.fail{border-color:var(--bad)}
+.verdict.calc{border-color:var(--dust)}
+.verdict b{font-family:var(--f-display);font-size:1.15rem;letter-spacing:.04em}
+.verdict.pass b{color:var(--ok)}
+.verdict.fail b{color:var(--bad)}
+.verdict.calc b{color:var(--dust)}
+.verdict .row{margin-top:4px}
+.clause{margin-top:12px;font-size:.78rem;color:var(--muted);font-family:var(--f-mono)}
+
+/* dual marking */
+.dual{display:grid;grid-template-columns:1fr 1.2fr;gap:24px;align-items:start}
+.dual > *{min-width:0}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:8px 12px;cursor:pointer;line-height:1.3}
+.checks input{accent-color:var(--water);width:18px;height:18px}
+.checks small{color:var(--muted)}
+html[data-lang="both"] .checks small .en{display:inline;margin-left:4px}
+.dualout{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px}
+.dualout .mark{font-family:var(--f-display);font-weight:700;font-size:2.4rem;line-height:1.1;color:var(--water);overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:.8rem;padding:2px 10px;border-radius:999px;margin-top:8px;border:1px solid currentColor}
+.tag.v{color:var(--ok)} .tag.r{color:var(--dust)} .tag.n{color:var(--muted)}
+.dualout .txt{margin-top:10px;font-size:.92rem}
+.rule{margin-top:16px;font-size:.9rem;color:var(--muted)}
+
+/* table */
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.86rem}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:500;letter-spacing:.04em;background:var(--sunk)}
+td.n{font-family:var(--f-display);font-weight:700;font-size:1.1rem;white-space:nowrap}
+td.m{font-family:var(--f-mono);font-size:.8rem;font-variant-numeric:tabular-nums}
+tr.grp td{background:var(--sunk);font-weight:700;font-size:.82rem}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.twin > *{min-width:0}
+
+/* glossary */
+.gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.gloss div{background:var(--surface);padding:10px 14px;display:grid;gap:2px}
+.gloss b{font-family:var(--f-en);font-weight:500}
+.gloss span{font-size:.88rem;color:var(--muted)}
+
+/* quiz */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px}
+.q > p{font-weight:500}
+.opts{display:grid;gap:6px;margin-top:10px}
+.opts button{text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:4px;padding:7px 10px;cursor:pointer;font-size:.88rem}
+.opts button:hover{border-color:var(--ink)}
+.opts button.right{border-color:var(--ok);color:var(--ok);font-weight:500}
+.opts button.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.opts button .en{color:inherit;opacity:.8}
+.q .why{margin-top:10px;font-size:.86rem;color:var(--muted)}
+.score{font-family:var(--f-mono);font-size:.9rem;color:var(--muted)}
+
+.src{font-size:.85rem;color:var(--muted)}
+.src li{margin-block:4px;overflow-wrap:anywhere}
+
+@media (max-width:900px){
+  .hero,.bench,.dual,.twin{grid-template-columns:1fr}
+  .hero{gap:24px;padding-block:28px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="std">IEC 60529:1989 + A1:1999 + A2:2013（Ed. 2.2）</div>
+    <div class="topr">
+      <nav class="toc" aria-label="Sections">
+        <a href="#solids"><span class="zh">第一位數</span><span class="en">1st numeral</span></a>
+        <a href="#water"><span class="zh">第二位數</span><span class="en">2nd numeral</span></a>
+        <a href="#dual"><span class="zh">雙重標示</span><span class="en">Dual coding</span></a>
+        <a href="#ref"><span class="zh">速查表</span><span class="en">Reference</span></a>
+        <a href="#gloss"><span class="zh">術語</span><span class="en">Glossary</span></a>
+        <a href="#quiz"><span class="zh">小測驗</span><span class="en">Quiz</span></a>
+      </nav>
+      <span class="seg" id="langSeg" role="group" aria-label="Language">
+        <button type="button" id="lzh" data-v="zh">中文</button><button type="button" id="len" data-v="en">EN</button><button type="button" id="lboth" data-v="both">雙語</button>
+      </span>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <p class="eyebrow">Ingress Protection Code</p>
+      <h1><span class="zh">每一個 IP 數字背後，都是一台測試設備</span><span class="en">Behind every IP digit is a piece of test equipment</span></h1>
+      <p class="lede"><span class="zh">IP67 的「6」是外殼在滑石粉艙裡抽負壓 2～8 小時、目標抽過 80 倍外殼容積的空氣，「7」是把外殼壓到水面下 1 公尺泡 30 分鐘。在銘牌上點選數字，看它代表什麼；往下捲動，每一級測試都有動畫與原文參數。</span><span class="en">The “6” in IP67 means the enclosure spent 2–8 hours under vacuum in a talcum dust chamber, aiming to draw 80 enclosure volumes of air through it. The “7” means it sat 1 m under water for 30 minutes. Pick digits on the rating plate to see what they mean, then scroll down for an animation and the exact test parameters of every level.</span></p>
+      <div class="jump"><a href="#solids" id="jumpS"><span class="zh">看第一位數的測試動畫 ↓</span><span class="en">First-numeral tests ↓</span></a><a href="#water" id="jumpW"><span class="zh">看第二位數的測試動畫 ↓</span><span class="en">Second-numeral tests ↓</span></a></div>
+    </div>
+    <div class="plate" aria-label="IP code decoder">
+      <div class="code" aria-live="polite"><span class="ip">IP</span><span class="d1" id="pd1">6</span><span class="d2" id="pd2">7</span></div>
+      <div class="digits">
+        <div class="drow solid" id="row1"><span class="lab"><span class="zh">第一位數</span><span class="en">1st numeral</span></span></div>
+        <div class="drow water" id="row2"><span class="lab"><span class="zh">第二位數</span><span class="en">2nd numeral</span></span></div>
+      </div>
+      <div class="meaning">
+        <div><span class="chip s">SOLID</span><span id="m1"></span></div>
+        <div><span class="chip w">WATER</span><span id="m2"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLIDS -->
+  <section id="solids">
+    <div class="shead">
+      <div>
+        <p class="eyebrow">First characteristic numeral · Clause 12、13</p>
+        <h2><span class="zh">第一位數：探棒與粉塵艙</span><span class="en">First numeral: access probes and the dust chamber</span></h2>
+        <p><span class="zh">第一位數同時考兩件事：人的身體部位（手背、手指、工具、鐵絲）碰不碰得到危險部位，以及固體異物進不進得去。1～4 級用探棒推，5、6 級進粉塵艙。拖動滑桿改開口尺寸，看探棒過不過得去。</span><span class="en">The first numeral covers two things at once: whether a body part (back of hand, finger, tool, wire) can reach hazardous parts, and whether solid foreign objects can get in. Levels 1–4 use probes; levels 5 and 6 use the dust chamber. Drag the sliders to change the opening size and see whether the probe gets through.</span></p>
+      </div>
+    </div>
+    <div class="tabs" id="solidTabs" role="tablist" aria-label="First numeral levels"></div>
+    <div class="bench" id="solidBench">
+      <div class="screen">
+        <canvas id="cvS" aria-label="First numeral test animation"></canvas>
+        <div class="ctl" id="ctlS"></div>
+        <div class="progress" id="progS"><button class="play" id="playS" type="button"></button><div class="bar"><i id="barS"></i></div><span class="mono" id="timeS"></span></div>
+      </div>
+      <aside class="spec" id="specS"></aside>
+    </div>
+  </section>
+
+  <!-- WATER -->
+  <section id="water">
+    <div class="shead">
+      <div>
+        <p class="eyebrow">Second characteristic numeral · Clause 14</p>
+        <h2><span class="zh">第二位數：從滴水到 80 °C 高壓水柱</span><span class="en">Second numeral: from dripping water to 80 °C high-pressure jets</span></h2>
+        <p><span class="zh">九個等級用到六種設備：滴水箱、擺動管、手持噴嘴、噴水嘴、浸水槽、扇形噴嘴。動畫把實際測試時間壓縮播放，下方進度條顯示對應的實際測試時間。</span><span class="en">Nine levels use six kinds of apparatus: drip box, oscillating tube, hand-held spray nozzle, hose nozzle, immersion tank and fan-jet nozzle. Each animation compresses the real test time; the progress bar shows the equivalent real duration.</span></p>
+      </div>
+    </div>
+    <div class="tabs" id="waterTabs" role="tablist" aria-label="Second numeral levels"></div>
+    <div class="bench" id="waterBench">
+      <div class="screen">
+        <canvas id="cvW" aria-label="Second numeral test animation"></canvas>
+        <div class="ctl" id="ctlW"></div>
+        <div class="progress"><button class="play" id="playW" type="button"></button><div class="bar"><i id="barW"></i></div><span class="mono" id="timeW"></span></div>
+      </div>
+      <aside class="spec" id="specW"></aside>
+    </div>
+  </section>
+
+  <!-- DUAL -->
+  <section id="dual">
+    <div class="shead">
+      <div>
+        <p class="eyebrow">Clause 6 · Dual coding</p>
+        <h2><span class="zh">IP67 不等於能沖水：雙重標示</span><span class="en">IP67 does not mean jet-proof: dual coding</span></h2>
+        <p><span class="zh">IPX1～IPX6 往下包含（過 IPX6 就算過 IPX1～5），但 IPX7、IPX8、IPX9 不包含噴水。浸水過關的外殼，標準直接視為「不適合承受 IPX5／IPX6 水柱」，除非另外測過並雙重標示。勾選你的產品通過了哪些測試：</span><span class="en">IPX1–IPX6 are cumulative (passing IPX6 covers IPX1–5), but IPX7, IPX8 and IPX9 do not cover water jets. An enclosure that only passed immersion is considered unsuitable for IPX5/IPX6 jets unless it was also tested and dual-coded. Tick the tests your product passed:</span></p>
+      </div>
+    </div>
+    <div class="dual">
+      <div>
+        <div class="checks" id="dualChecks">
+          <label><input type="checkbox" id="c5" value="5">IPX5 <small><span class="zh">噴水</span><span class="en">water jets</span></small></label>
+          <label><input type="checkbox" id="c6" value="6" checked>IPX6 <small><span class="zh">強力噴水</span><span class="en">powerful jets</span></small></label>
+          <label><input type="checkbox" id="c7" value="7" checked>IPX7 <small><span class="zh">暫時浸水</span><span class="en">temporary immersion</span></small></label>
+          <label><input type="checkbox" id="c8" value="8">IPX8 <small><span class="zh">持續浸水</span><span class="en">continuous immersion</span></small></label>
+          <label><input type="checkbox" id="c9" value="9">IPX9 <small><span class="zh">高溫高壓</span><span class="en">high temp / pressure</span></small></label>
+        </div>
+        <p class="rule"><span class="zh">規則：噴水類取最高等級（6 已涵蓋 5），浸水類取最高等級，再用斜線串起來。標準把結果分成「通用（Versatile）」與「限定（Restricted）」兩種用途。</span><span class="en">Rule: take the highest jet level (6 covers 5) and the highest immersion level, then join them with a slash. The standard classes the result as “Versatile” or “Restricted” application.</span></p>
+      </div>
+      <div class="dualout" aria-live="polite">
+        <div class="eyebrow"><span class="zh">應標示為</span><span class="en i">Designation</span></div>
+        <div class="mark" id="dualMark"></div>
+        <span class="tag" id="dualTag"></span>
+        <div class="txt" id="dualText"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REFERENCE -->
+  <section id="ref">
+    <div class="shead">
+      <div>
+        <p class="eyebrow">Tables 6–9</p>
+        <h2><span class="zh">測試參數速查表</span><span class="en">Test parameter reference</span></h2>
+        <p><span class="zh">數值取自 IEC 60529 合併版 2.2 原文。產品標準（product standard）可另行規定樣品數、安裝、是否通電與允許進水量，以產品標準為優先。</span><span class="en">Values are from the IEC 60529 consolidated edition 2.2. The relevant product standard may specify sample count, mounting, energisation and permitted water ingress, and takes precedence.</span></p>
+      </div>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th><span class="zh">等級</span><span class="en">Level</span></th><th><span class="zh">試具</span><span class="en">Test means</span></th><th><span class="zh">關鍵參數</span><span class="en">Key parameters</span></th><th><span class="zh">時間</span><span class="en">Duration</span></th><th><span class="zh">判定</span><span class="en">Acceptance</span></th></tr></thead>
+        <tbody id="refBody"></tbody>
+      </table>
+    </div>
+    <div class="twin">
+      <div>
+        <h3><span class="zh">IPX3／IPX4 擺動管總水量（Table 9）</span><span class="en">IPX3 / IPX4 oscillating tube total flow (Table 9)</span></h3>
+        <div class="tscroll" style="margin-top:10px">
+          <table style="min-width:420px">
+            <thead><tr><th><span class="zh">管半徑 R</span><span class="en">Tube radius R</span></th><th><span class="zh">IPX3 孔數</span><span class="en">IPX3 holes</span></th><th><span class="zh">IPX3 總量</span><span class="en">IPX3 flow</span></th><th><span class="zh">IPX4 孔數</span><span class="en">IPX4 holes</span></th><th><span class="zh">IPX4 總量</span><span class="en">IPX4 flow</span></th></tr></thead>
+            <tbody class="m" id="t9"></tbody>
+          </table>
+        </div>
+        <p class="rule"><span class="zh">網路常寫「IPX3／IPX4 = 10 L/min」，那只適用手持噴嘴法。擺動管法的水量由管半徑決定，最多 7 L/min。</span><span class="en">“IPX3/IPX4 = 10 L/min” is often quoted online, but that applies only to the hand-held spray nozzle. With the oscillating tube the flow depends on tube radius and never exceeds 7 L/min.</span></p>
+      </div>
+      <div>
+        <h3><span class="zh">IPX9 與車用 IPX9K 不一樣</span><span class="en">IPX9 is not the automotive IPX9K</span></h3>
+        <div class="tscroll" style="margin-top:10px">
+          <table style="min-width:420px">
+            <thead><tr><th><span class="zh">項目</span><span class="en">Item</span></th><th>IEC 60529 IPX9</th><th>ISO 20653 IPX9K</th></tr></thead>
+            <tbody>
+              <tr><td><span class="zh">水溫</span><span class="en">Water temp.</span></td><td class="m">80 ±5 °C</td><td class="m">80 ±5 °C</td></tr>
+              <tr><td><span class="zh">水量</span><span class="en">Flow rate</span></td><td class="m">15 ±1 L/min</td><td class="m">14–16 L/min</td></tr>
+              <tr><td><span class="zh">距離</span><span class="en">Distance</span></td><td class="m">175 ±25 mm</td><td class="m">100–150 mm</td></tr>
+              <tr><td><span class="zh">水壓</span><span class="en">Pressure</span></td><td class="m"><span class="zh">調到上述流量</span><span class="en">set to reach flow</span></td><td class="m">≈ 8–10 MPa</td></tr>
+              <tr><td><span class="zh">小件程序</span><span class="en">Small items</span></td><td colspan="2"><span class="zh">轉盤 5 r/min，4 個角度各 30 s</span><span class="en">turntable 5 r/min, 4 angles × 30 s</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="rule"><span class="zh">IPX9K 欄位為測試設備商與實驗室的整理資料（外部來源），未對照 ISO 20653 原文。兩者不可直接互換。</span><span class="en">The IPX9K column comes from test-equipment vendors and labs (secondary sources) and was not checked against ISO 20653 itself. The two ratings are not interchangeable.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GLOSSARY -->
+  <section id="gloss">
+    <div class="shead">
+      <div>
+        <p class="eyebrow">Glossary</p>
+        <h2><span class="zh">中英術語對照</span><span class="en">Key terms, English ↔ 中文</span></h2>
+        <p><span class="zh">看原文標準、寫規格書或跟實驗室溝通時最常用到的詞。</span><span class="en">The terms you will meet most often when reading the standard, writing a spec or talking to a test lab.</span></p>
+      </div>
+    </div>
+    <div class="gloss" id="glossBox"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz">
+    <div class="shead">
+      <div>
+        <p class="eyebrow">Self-check</p>
+        <h2><span class="zh">小測驗</span><span class="en">Quiz</span></h2>
+        <p><span class="zh">點選答案會立刻顯示解析。</span><span class="en">Pick an answer to see the explanation.</span></p>
+      </div>
+      <div class="score" id="score">0 / 6</div>
+    </div>
+    <div class="quiz" id="quizBox"></div>
+  </section>
+
+  <section>
+    <h3><span class="zh">資料來源</span><span class="en">Sources</span></h3>
+    <ul class="src">
+      <li>IEC 60529:1989+A1:1999+A2:2013, consolidated Ed. 2.2 (US CFR IBR public copy): <a href="https://law.resource.org/pub/us/cfr/ibr/inc/iec/iec.60529.2013.pdf" target="_blank" rel="noopener">law.resource.org</a></li>
+      <li><span class="zh">IPX9 與 IPX9K 比較（外部資料）：</span><span class="en i">IPX9 vs IPX9K (secondary sources):</span> <a href="https://videoexpertsgroup.com/glossary/ipx9-vs-ipx9k" target="_blank" rel="noopener">Video Experts Group</a>, <a href="https://its-gmbh.de/wp-content/uploads/2025/06/FAQ-IPX9-or-IPX9K.pdf" target="_blank" rel="noopener">ITS GmbH FAQ</a>, <a href="https://www.dlsemc.com/ipx9-high-temperature-and-high-pressure-water-jets-tests/" target="_blank" rel="noopener">DLS EMC</a></li>
+      <li><span class="zh">動畫為示意，未按比例繪製；正式送測請以最新版標準與產品標準為準。</span><span class="en">Animations are schematic and not to scale. For formal testing, follow the latest edition of the standard and the relevant product standard.</span></li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(() => {
+/* ---------- language ---------- */
+const root = document.documentElement;
+let LANG = 'both';
+try { const s = localStorage.getItem('ip-lab-lang'); if (s === 'zh' || s === 'en' || s === 'both') LANG = s; } catch(e){}
+const B = (zh, en) => `<span class="zh">${zh}</span><span class="en">${en}</span>`;
+const Bi = (zh, en) => `<span class="zh">${zh}</span><span class="en i">${en}</span>`;
+const T = (zh, en) => LANG === 'en' ? en : zh;   // canvas text: English only in EN mode
+
+/* ---------- tokens ---------- */
+let C = {};
+const MONO = '"IBM Plex Mono",ui-monospace,monospace';
+const BODY_ZH = '"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif';
+const BODY_EN = '"IBM Plex Sans","Segoe UI",system-ui,sans-serif';
+function readColors(){
+  const s = getComputedStyle(root);
+  ['bg','surface','sunk','ink','muted','line','steel','water','water-soft','dust','dust-soft','hot','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim());
+}
+readColors();
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(readColors, 30)); } catch(e){}
+new MutationObserver(() => setTimeout(readColors, 30)).observe(root, {attributes:true, attributeFilter:['data-theme','class','style']});
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2, D2R = Math.PI / 180;
+const rand = (a,b) => a + Math.random() * (b - a);
+const fmt = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60; return h ? `${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`; };
+
+/* ---------- canvas stage ---------- */
+function Stage(canvas){
+  this.c = canvas; this.ctx = canvas.getContext('2d'); this.W = 800; this.H = 420;
+  this.t = 0; this.P = []; this.playing = !reduce; this.visible = true; this.state = {};
+  this.resize = () => {
+    const w = this.c.clientWidth || 800, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.c.width = Math.round(w * dpr); this.c.height = Math.round(w * this.H / this.W * dpr);
+    this.ctx.setTransform(this.c.width / this.W, 0, 0, this.c.height / this.H, 0, 0);
+  };
+  this.resize();
+  new ResizeObserver(() => { this.resize(); if (!this.playing) this.render(0); }).observe(canvas);
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { this.visible = es[0].isIntersecting; }).observe(canvas);
+}
+Stage.prototype.render = function(dt){
+  const x = this.ctx; x.clearRect(0,0,this.W,this.H); x.fillStyle = C.surface; x.fillRect(0,0,this.W,this.H);
+  this.scene && this.scene.draw(x, this, dt);
+};
+Stage.prototype.reset = function(){ this.t = 0; this.P = []; this.state = {}; this.acc = 0; };
+
+/* ---------- drawing helpers ---------- */
+function rr(x, X, Y, w, h, r){ x.beginPath(); if (x.roundRect) x.roundRect(X,Y,w,h,r); else x.rect(X,Y,w,h); }
+function text(x, s, X, Y, o = {}){
+  x.font = `${o.w || 500} ${o.size || 17}px ${o.mono ? MONO : (LANG === 'en' ? BODY_EN : BODY_ZH)}`; x.fillStyle = o.color || C.muted;
+  x.textAlign = o.align || 'left'; x.textBaseline = o.base || 'middle'; x.fillText(s, X, Y);
+}
+function dut(x, cx, cy, w, h, ang = 0, mark){
+  x.save(); x.translate(cx, cy); x.rotate(ang);
+  rr(x, -w/2, -h/2, w, h, 8); x.fillStyle = C.sunk; x.fill(); x.lineWidth = 2.5; x.strokeStyle = C.ink; x.stroke();
+  x.beginPath(); x.moveTo(-w/2 + 6, -h/2 + 16); x.lineTo(w/2 - 6, -h/2 + 16); x.setLineDash([5,4]); x.lineWidth = 1.5; x.strokeStyle = C.steel; x.stroke(); x.setLineDash([]);
+  text(x, mark == null ? T('試樣', 'DUT') : mark, 0, 8, {align:'center', size:16, w:700, color:C.muted});
+  x.restore();
+}
+function dim(x, x1, y1, x2, y2, label, o = {}){
+  x.save(); x.strokeStyle = o.color || C.muted; x.fillStyle = o.color || C.muted; x.lineWidth = 1.5;
+  x.beginPath(); x.moveTo(x1,y1); x.lineTo(x2,y2); x.stroke();
+  const a = Math.atan2(y2-y1, x2-x1);
+  [[x1,y1,a+Math.PI],[x2,y2,a]].forEach(([px,py,aa]) => { x.beginPath(); x.moveTo(px,py); x.lineTo(px - 9*Math.cos(aa-0.4), py - 9*Math.sin(aa-0.4)); x.lineTo(px - 9*Math.cos(aa+0.4), py - 9*Math.sin(aa+0.4)); x.closePath(); x.fill(); });
+  if (label) text(x, label, (x1+x2)/2 + (o.dx||0), (y1+y2)/2 + (o.dy||-14), {align:'center', size:o.size||16, mono:true, color:o.color||C.muted, w:500});
+  x.restore();
+}
+function splash(st, X, Y, n, col, sp = 160){
+  for (let i = 0; i < n; i++) st.P.push({x:X, y:Y, vx:rand(-sp,sp), vy:rand(-sp*1.3,-sp*0.2), g:900, life:rand(.25,.5), r:rand(1.2,2.2), col, k:'s'});
+}
+function stepParticles(x, st, dt, hit){
+  const out = [];
+  for (const p of st.P){
+    p.vy += (p.g || 0) * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+    if (p.life <= 0 || p.y > st.H + 20 || p.x < -20 || p.x > st.W + 20) continue;
+    if (p.k !== 's' && hit && hit(p)) continue;
+    out.push(p);
+  }
+  st.P = out.length > 1600 ? out.slice(-1600) : out;
+  for (const p of st.P){
+    x.globalAlpha = p.a == null ? 1 : p.a; x.fillStyle = p.col || C.water;
+    if (p.k === 'j'){ x.strokeStyle = p.col || C.water; x.lineWidth = p.r; x.lineCap = 'round'; x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(p.x - p.vx*0.012, p.y - p.vy*0.012); x.stroke(); }
+    else if (p.k === 'd'){ x.beginPath(); x.ellipse(p.x, p.y, p.r*0.8, p.r*1.5, 0, 0, TAU); x.fill(); }
+    else { x.beginPath(); x.arc(p.x, p.y, p.r, 0, TAU); x.fill(); }
+  }
+  x.globalAlpha = 1;
+}
+function inRot(p, cx, cy, w, h, ang){
+  const dx = p.x - cx, dy = p.y - cy, c = Math.cos(-ang), s = Math.sin(-ang);
+  const lx = dx*c - dy*s, ly = dx*s + dy*c; return Math.abs(lx) <= w/2 && Math.abs(ly) <= h/2;
+}
+
+/* =========================================================
+   SECOND NUMERAL — WATER SCENES
+   ========================================================= */
+function dripBox(x){
+  rr(x, 180, 26, 440, 34, 4); x.fillStyle = C['water-soft']; x.fill(); x.strokeStyle = C.water; x.lineWidth = 2; x.stroke();
+  text(x, T('滴水箱', 'Drip box'), 190, 43, {size:15, color:C.water, w:700});
+  x.fillStyle = C.water; for (let i = 0; i <= 21; i++){ x.beginPath(); x.arc(190 + i*20, 61, 2, 0, TAU); x.fill(); }
+}
+function spawnDrips(st, dt, rate){
+  st.acc = (st.acc || 0) + rate * dt;
+  while (st.acc > 1){ st.acc--; st.P.push({x:190 + Math.floor(Math.random()*22)*20, y:64, vx:0, vy:40, g:1100, life:2, r:2.4, k:'d', col:C.water}); }
+}
+const W_SCENES = {
+  1: { total:600, loop:12, draw(x, st, dt){
+      dripBox(x); spawnDrips(st, dt, 26);
+      const cx = 400, ty = 372, ph = st.t / 6 * TAU, bx = cx + 42*Math.sin(ph), by = ty - 58;
+      x.beginPath(); x.ellipse(cx, ty, 150, 24, 0, 0, TAU); x.fillStyle = C.line; x.fill(); x.strokeStyle = C.steel; x.lineWidth = 2; x.stroke();
+      x.beginPath(); x.arc(cx + 130*Math.cos(ph), ty + 20*Math.sin(ph), 5, 0, TAU); x.fillStyle = C.ink; x.fill();
+      x.beginPath(); x.arc(cx, ty, 3, 0, TAU); x.fillStyle = C.ink; x.fill();
+      dut(x, bx, by, 120, 100);
+      stepParticles(x, st, dt, p => {
+        if (p.y >= by - 50 && Math.abs(p.x - bx) <= 60){ splash(st, p.x, by - 50, 2, C.water, 90); return true; }
+        if (p.y >= ty - 6){ splash(st, p.x, ty - 6, 1, C.water, 60); return true; } return false; });
+      text(x, T('轉盤 1 r/min　偏心約 100 mm', 'Turntable 1 r/min · eccentricity ≈100 mm'), 400, 408, {align:'center', size:15, mono:true});
+      text(x, '1 mm/min', 640, 140, {size:18, mono:true, color:C.water, w:500});
+      text(x, T('垂直滴水', 'vertical drops'), 640, 166, {size:15});
+  }},
+  2: { total:600, loop:12, draw(x, st, dt){
+      dripBox(x); spawnDrips(st, dt, 70);
+      const pos = Math.min(3, Math.floor((st.t % 12) / 3));
+      const names = LANG === 'en' ? ['Plane A · tilt left 15°','Plane A · tilt right 15°','Plane B · tilt forward 15°','Plane B · tilt back 15°'] : ['平面 A・左傾 15°','平面 A・右傾 15°','平面 B・前傾 15°','平面 B・後傾 15°'];
+      const ang = [-15, 15, 0, 0][pos] * D2R, cx = 400, cy = 300, w = 130, h = 100;
+      x.fillStyle = C.line; x.fillRect(250, 364, 300, 10);
+      x.beginPath(); x.moveTo(cx, 364); x.lineTo(cx, cy + 30); x.strokeStyle = C.steel; x.lineWidth = 6; x.stroke();
+      if (pos >= 2){
+        const f = pos === 2 ? 1 : -1;
+        x.beginPath(); x.moveTo(cx - w/2, cy - h/2); x.lineTo(cx + w/2, cy - h/2); x.lineTo(cx + w/2 - 14*f, cy - h/2 - 22*f); x.lineTo(cx - w/2 - 14*f, cy - h/2 - 22*f); x.closePath();
+        x.fillStyle = pos === 2 ? C.line : C.sunk; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 2; x.stroke();
+      }
+      dut(x, cx, cy, w, h, ang);
+      stepParticles(x, st, dt, p => {
+        if (inRot(p, cx, cy - (pos === 2 ? 10 : 0), w, h + (pos === 2 ? 22 : 0), ang)){ splash(st, p.x, p.y, 2, C.water, 90); return true; }
+        return p.y >= 362; });
+      const ix = 690, iy = 300;
+      x.strokeStyle = C.line; x.lineWidth = 2; x.beginPath(); x.moveTo(ix-46, iy); x.lineTo(ix+46, iy); x.moveTo(ix, iy-46); x.lineTo(ix, iy+46); x.stroke();
+      [[-46,0],[46,0],[0,46],[0,-46]].forEach(([dx,dy], i) => { x.beginPath(); x.arc(ix+dx, iy+dy, 8, 0, TAU); x.fillStyle = i === pos ? C.water : C.surface; x.fill(); x.strokeStyle = C.water; x.stroke(); });
+      text(x, T('俯視：4 個傾斜方向', 'Top view: 4 tilt directions'), ix, iy - 68, {align:'center', size:14});
+      text(x, T(`位置 ${pos+1} / 4`, `Position ${pos+1} / 4`), 90, 140, {size:18, mono:true, color:C.water});
+      text(x, names[pos], 90, 166, {size:15});
+      text(x, T('3 mm/min　每個位置 2.5 min', '3 mm/min · 2.5 min each'), 90, 192, {size:14, mono:true});
+  }},
+  3: tubeScene(3), 4: tubeScene(4),
+  5: jetScene(5), 6: jetScene(6),
+  7: { total:1800, loop:12, draw(x, st, dt){ tank(x, st, dt, 7); } },
+  8: { total:3600, loop:12, draw(x, st, dt){ tank(x, st, dt, 8); } },
+  9: { total:120, loop:10, draw(x, st, dt){
+      const cx = 430, ty = 362, bx = cx, by = 312, ph = st.t / 2.4 * TAU;
+      x.beginPath(); x.ellipse(cx, ty, 110, 20, 0, 0, TAU); x.fillStyle = C.line; x.fill(); x.strokeStyle = C.steel; x.lineWidth = 2; x.stroke();
+      x.beginPath(); x.arc(cx + 95*Math.cos(ph), ty + 16*Math.sin(ph), 4.5, 0, TAU); x.fillStyle = C.ink; x.fill();
+      dut(x, bx, by, 100, 80);
+      const sx = bx + 44*Math.sin(ph); if (Math.cos(ph) > 0){ x.fillStyle = C.steel; x.globalAlpha = .5; x.fillRect(sx - 3, by - 30, 6, 66); x.globalAlpha = 1; }
+      const pos = Math.floor((st.t % 10) / 2.5), Rn = 175;
+      const angs = [180, 210, 240, 270];
+      angs.forEach((a, i) => { const nx = bx + Rn*Math.cos(a*D2R), ny = by + Rn*Math.sin(a*D2R);
+        x.beginPath(); x.arc(nx, ny, i === pos ? 9 : 6, 0, TAU); x.fillStyle = i === pos ? C.hot : C.line; x.fill();
+        text(x, T(`位置${i+1}`, `P${i+1}`), nx + (i === 3 ? 22 : -14), ny - 18, {align: i === 3 ? 'left' : 'right', size:13}); });
+      x.beginPath(); x.arc(bx, by, Rn, Math.PI, 1.5*Math.PI); x.setLineDash([4,5]); x.strokeStyle = C.line; x.lineWidth = 1.5; x.stroke(); x.setLineDash([]);
+      const a = angs[pos] * D2R, nx = bx + Rn*Math.cos(a), ny = by + Rn*Math.sin(a), dir = a + Math.PI;
+      x.save(); x.translate(nx, ny); x.rotate(dir); rr(x, -34, -8, 34, 16, 3); x.fillStyle = C.steel; x.fill(); x.restore();
+      st.acc = (st.acc || 0) + 360 * dt;
+      while (st.acc > 1){ st.acc--; const s = dir + rand(-0.26, 0.26), v = rand(620, 760);
+        st.P.push({x:nx, y:ny, vx:Math.cos(s)*v, vy:Math.sin(s)*v, g:150, life:.6, r:2, k:'j', col:C.hot}); }
+      if (Math.random() < 0.5) st.P.push({x:bx + rand(-50,50), y:by - 40, vx:rand(-10,10), vy:rand(-50,-25), g:-10, life:1.6, r:rand(5,10), k:'s', col:C.line, a:.35});
+      stepParticles(x, st, dt, p => { if (p.k === 'j' && Math.abs(p.x - bx) <= 50 && Math.abs(p.y - by) <= 40){ splash(st, p.x, p.y, 1, C.hot, 140); return true; } return false; });
+      rr(x, 690, 70, 18, 120, 9); x.fillStyle = C.sunk; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 1.5; x.stroke();
+      x.fillStyle = C.hot; x.fillRect(694, 92, 10, 92); x.beginPath(); x.arc(699, 196, 14, 0, TAU); x.fill();
+      text(x, '80 °C', 722, 110, {size:20, mono:true, color:C.hot, w:500});
+      text(x, '±5 °C', 722, 136, {size:14, mono:true});
+      text(x, '15 L/min', 722, 170, {size:16, mono:true, color:C.hot});
+      text(x, T('轉盤 5 r/min', 'Turntable 5 r/min'), 520, 400, {size:14, mono:true});
+      dim(x, bx - 50, by - 8, bx - Rn + 12, by - 8, '175±25 mm', {size:13, dy:16});
+      text(x, T(`位置 ${pos+1} / 4　每個 30 s`, `Position ${pos+1} / 4 · 30 s each`), 40, 40, {size:16, mono:true, color:C.hot});
+  }},
+};
+function tubeScene(n){
+  return { total: 600, loop: 12, draw(x, st, dt){
+    const mode = st.state.mode || 'tube';
+    const cx = 400, cy = 250, w = 120, h = 86;
+    if (mode === 'tube'){
+      const A = (n === 3 ? 60 : 175) * D2R, P = n === 3 ? 4 : 12, R = 168;
+      const th = A * Math.sin(st.t / P * TAU), ct = Math.cos(th), stt = Math.sin(th);
+      x.setLineDash([6,6]); x.strokeStyle = C.line; x.lineWidth = 1.5; x.beginPath(); x.moveTo(cx - R - 40, cy); x.lineTo(cx + R + 40, cy); x.stroke(); x.setLineDash([]);
+      [cx - R - 6, cx + R + 6].forEach(px => { x.beginPath(); x.arc(px, cy, 7, 0, TAU); x.fillStyle = C.ink; x.fill(); });
+      text(x, T('擺動軸', 'Pivot axis'), cx + R + 18, cy + 22, {size:13});
+      if (n === 3){ x.fillStyle = C.steel; x.fillRect(cx - 80, cy + h/2, 160, 10); }
+      else { x.strokeStyle = C.steel; x.lineWidth = 3; x.setLineDash([8,5]); x.beginPath(); x.moveTo(cx - 80, cy + h/2 + 5); x.lineTo(cx + 80, cy + h/2 + 5); x.stroke(); x.setLineDash([]); }
+      x.fillStyle = C.steel; x.fillRect(cx - 4, cy + h/2 + 10, 8, 120);
+      const turned = (st.t % 12) >= 6 && n === 3;
+      dut(x, cx, cy, w, h, 0, turned ? T('已轉 90°', 'Turned 90°') : undefined);
+      const pt = phi => [cx + R*Math.sin(phi), cy - R*Math.cos(phi)*ct, R*Math.cos(phi)*stt];
+      x.lineWidth = 7; x.lineCap = 'round';
+      for (let p = -90; p < 90; p += 3){ const a = pt(p*D2R), b = pt((p+3)*D2R); x.globalAlpha = a[2] < -1 ? .45 : 1; x.strokeStyle = C.steel; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); x.stroke(); }
+      x.globalAlpha = 1;
+      const span = n === 3 ? 60 : 90;
+      for (let p = -span; p <= span; p += 10){
+        const [hx, hy, hz] = pt(p*D2R);
+        x.beginPath(); x.arc(hx, hy, 3, 0, TAU); x.fillStyle = C.water; x.globalAlpha = hz < -1 ? .45 : 1; x.fill(); x.globalAlpha = 1;
+        if (Math.random() < 9 * dt){ const dx = cx - hx, dy = cy - hy, L = Math.hypot(dx, dy) || 1;
+          st.P.push({x:hx, y:hy, vx:dx/L*330, vy:dy/L*330, g:120, life:1.2, r:2, k:'j', col:C.water, a: hz < -1 ? .5 : 1}); }
+      }
+      stepParticles(x, st, dt, p => { if (Math.abs(p.x - cx) <= w/2 && Math.abs(p.y - cy) <= h/2){ splash(st, p.x, p.y, 1, C.water, 100); return true; } return false; });
+      const gx = 705, gy = 120, gr = 58;
+      x.beginPath(); x.moveTo(gx, gy); x.arc(gx, gy, gr, -Math.PI/2 - A, -Math.PI/2 + A); x.closePath(); x.fillStyle = C['water-soft']; x.fill();
+      x.beginPath(); x.moveTo(gx, gy); x.lineTo(gx + gr*Math.sin(th), gy - gr*Math.cos(th)); x.strokeStyle = C.water; x.lineWidth = 4; x.stroke();
+      x.beginPath(); x.arc(gx, gy, 5, 0, TAU); x.fillStyle = C.ink; x.fill();
+      text(x, T('側視擺動角', 'Side-view angle'), gx, gy + 76, {align:'center', size:13});
+      text(x, `${Math.round(th / D2R)}°`, gx, gy + 98, {align:'center', size:16, mono:true, color:C.water});
+      text(x, n === 3 ? T('擺動 ±60°　約 4 s/往返', 'Oscillates ±60° · ≈4 s per cycle') : T('擺動近 ±180°　約 12 s/往返', 'Oscillates ≈±180° · ≈12 s per cycle'), 30, 36, {size:15, mono:true, color:C.water});
+      text(x, n === 3 ? T('噴孔：中心兩側 60° 弧', 'Holes: 60° arc each side of centre') : T('噴孔：布滿 180° 半圓', 'Holes: full 180° semicircle'), 30, 60, {size:14});
+      text(x, n === 3 ? T('支架：不打孔', 'Support: not perforated') : T('支架：打孔，不擋水', 'Support: perforated'), 30, 84, {size:14});
+    } else {
+      x.fillStyle = C.steel; x.fillRect(cx - 4, cy + h/2, 8, 140); x.fillRect(cx - 70, cy + h/2, 140, 8);
+      dut(x, cx, cy, w, h);
+      const R = 150, a = n === 3 ? (-90 + 60*Math.sin(st.t / 3 * TAU)) * D2R : (st.t / 6 * TAU) - Math.PI/2;
+      const nx = cx + R*Math.cos(a), ny = cy + R*Math.sin(a), dir = a + Math.PI;
+      x.save(); x.translate(nx, ny); x.rotate(dir);
+      rr(x, -40, -9, 40, 18, 3); x.fillStyle = C.steel; x.fill();
+      if (n === 3){ x.beginPath(); x.arc(-6, 0, 26, -Math.PI/2 - 0.2, Math.PI/2 + 0.2, true); x.strokeStyle = C.ink; x.lineWidth = 4; x.stroke(); }
+      x.restore();
+      st.acc = (st.acc || 0) + 220 * dt;
+      while (st.acc > 1){ st.acc--; const s = dir + rand(-0.45, 0.45), v = rand(380, 460);
+        st.P.push({x:nx, y:ny, vx:Math.cos(s)*v, vy:Math.sin(s)*v, g:200, life:.8, r:2, k:'j', col:C.water}); }
+      stepParticles(x, st, dt, p => { if (Math.abs(p.x - cx) <= w/2 && Math.abs(p.y - cy) <= h/2){ splash(st, p.x, p.y, 1, C.water, 100); return true; } return false; });
+      if (n === 3){ x.beginPath(); x.moveTo(cx, cy); x.arc(cx, cy, R + 30, (-90-60)*D2R, (-90+60)*D2R); x.closePath(); x.fillStyle = C['water-soft']; x.globalAlpha = .35; x.fill(); x.globalAlpha = 1; }
+      text(x, T('手持噴嘴　10 L/min ±5 %　50–150 kPa', 'Hand-held nozzle · 10 L/min ±5 % · 50–150 kPa'), 30, 36, {size:15, mono:true, color:C.water});
+      text(x, n === 3 ? T('遮板裝上，只噴 ±60° 範圍', 'Shield fitted: spray within ±60° only') : T('遮板拆掉，從所有方向噴', 'Shield removed: spray from all directions'), 30, 60, {size:14});
+      text(x, T('1 min/m²，至少 5 min', '1 min/m², minimum 5 min'), 30, 84, {size:14});
+    }
+  }};
+}
+function jetScene(n){
+  return { total: 180, loop: 9, draw(x, st, dt){
+    const bx = 640, by = 236, w = 130, h = 150, R = 500;
+    const a = Math.PI + 0.55 * Math.sin(st.t / 4.5 * TAU);
+    const nx = bx + R*Math.cos(a), ny = by + R*Math.sin(a);
+    const aim = Math.atan2(by + 50*Math.sin(st.t*1.7) - ny, bx - nx);
+    x.beginPath(); x.moveTo(nx, ny); x.quadraticCurveTo(nx - 60, ny + 80, 20, 410); x.strokeStyle = C.ink; x.lineWidth = n === 5 ? 6 : 10; x.stroke();
+    x.save(); x.translate(nx, ny); x.rotate(aim);
+    x.beginPath(); x.moveTo(-50, -(n === 5 ? 10 : 14)); x.lineTo(0, -(n === 5 ? 5 : 8)); x.lineTo(0, n === 5 ? 5 : 8); x.lineTo(-50, n === 5 ? 10 : 14); x.closePath(); x.fillStyle = C.steel; x.fill();
+    x.restore();
+    dut(x, bx, by, w, h);
+    const rate = n === 5 ? 260 : 620, spread = n === 5 ? 0.012 : 0.03, rr0 = n === 5 ? 2 : 3.4;
+    st.acc = (st.acc || 0) + rate * dt;
+    while (st.acc > 1){ st.acc--; const s = aim + rand(-spread, spread), v = rand(1000, 1150);
+      st.P.push({x:nx, y:ny, vx:Math.cos(s)*v, vy:Math.sin(s)*v, g:120, life:.8, r:rr0, k:'j', col:C.water}); }
+    stepParticles(x, st, dt, p => { if (p.k === 'j' && Math.abs(p.x - bx) <= w/2 && Math.abs(p.y - by) <= h/2){ splash(st, bx - w/2, p.y, n === 5 ? 1 : 2, C.water, 260); return true; } return false; });
+    dim(x, 130, 400, bx - w/2 - 6, 400, T('噴嘴到外殼表面 2.5 – 3 m', 'Nozzle to enclosure 2.5 – 3 m'), {size:15});
+    text(x, n === 5 ? T('噴嘴 Ø6.3 mm', 'Nozzle Ø6.3 mm') : T('噴嘴 Ø12.5 mm', 'Nozzle Ø12.5 mm'), 30, 36, {size:18, mono:true, color:C.water, w:500});
+    text(x, n === 5 ? '12.5 L/min ±5 %' : '100 L/min ±5 %', 30, 62, {size:16, mono:true});
+    text(x, n === 5 ? T('2.5 m 處水柱核心約 Ø40 mm', 'Core ≈Ø40 mm at 2.5 m') : T('2.5 m 處水柱核心約 Ø120 mm', 'Core ≈Ø120 mm at 2.5 m'), 30, 88, {size:14});
+    text(x, T('從所有可行方向噴', 'from all practicable directions'), bx, by + h/2 + 22, {size:14, align:'center'});
+  }};
+}
+function tank(x, st, dt, n){
+  const L = 200, Rt = 600, top = 50, bot = 405, surf = 96, m = 230;
+  rr(x, L, top, Rt - L, bot - top, 6); x.fillStyle = C.sunk; x.fill();
+  x.beginPath(); x.moveTo(L, bot);
+  for (let X = L; X <= Rt; X += 10) x.lineTo(X, surf + 3*Math.sin(X/28 + st.t*2.2));
+  x.lineTo(Rt, bot); x.closePath(); x.fillStyle = C['water-soft']; x.fill();
+  x.beginPath(); for (let X = L; X <= Rt; X += 10){ const Y = surf + 3*Math.sin(X/28 + st.t*2.2); X === L ? x.moveTo(X, Y) : x.lineTo(X, Y); } x.strokeStyle = C.water; x.lineWidth = 2; x.stroke();
+  rr(x, L, top, Rt - L, bot - top, 6); x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke();
+  const tall = n === 7 && st.state.tall;
+  const bx = 400; let bw, bh, btop;
+  if (n === 7){
+    if (tall){ bw = 120; bh = 268; btop = surf + 0.15*m; }
+    else { bw = 140; bh = 110; btop = surf + 1*m - bh; }
+  } else { bw = 140; bh = 100; btop = bot - 8 - bh; }
+  dut(x, bx, btop + bh/2, bw, bh);
+  if (Math.random() < 6*dt) st.P.push({x:rand(L + 20, Rt - 20), y:bot - 6, vy:-rand(40,70), life:5, r:rand(2,4)});
+  st.P = st.P.filter(p => { p.y += p.vy*dt; p.x += Math.sin(p.y/14)*0.4; p.life -= dt; return p.life > 0 && p.y > surf + 4; });
+  for (const p of st.P){ x.globalAlpha = .55; x.strokeStyle = C.water; x.lineWidth = 1.5; x.beginPath(); x.arc(p.x, p.y, p.r, 0, TAU); x.stroke(); }
+  x.globalAlpha = 1;
+  text(x, T('水面', 'Surface'), Rt + 12, surf, {size:14, color:C.water});
+  if (n === 7){
+    if (tall){
+      dim(x, Rt - 40, surf + 2, Rt - 40, btop, '', {color:C.water});
+      text(x, '0.15 m', Rt + 12, surf + 44, {size:18, mono:true, color:C.water, w:500});
+      text(x, T('最高點在水下', 'to highest point'), Rt + 12, surf + 68, {size:14});
+      dim(x, bx - bw/2 - 24, btop, bx - bw/2 - 24, btop + bh, '', {});
+      text(x, '≥ 850 mm', L - 14, btop + bh/2, {size:15, mono:true, align:'right'});
+    } else {
+      dim(x, Rt - 40, surf + 2, Rt - 40, btop + bh, '', {color:C.water});
+      text(x, '1 m', Rt + 12, surf + 120, {size:18, mono:true, color:C.water, w:500});
+      text(x, T('最低點在水下', 'to lowest point'), Rt + 12, surf + 144, {size:14});
+      dim(x, bx - bw/2 - 24, btop, bx - bw/2 - 24, btop + bh, '', {});
+      text(x, '< 850 mm', L - 14, btop + bh/2, {size:15, mono:true, align:'right'});
+    }
+    text(x, '30 min', 30, 40, {size:22, mono:true, color:C.water, w:500});
+    text(x, T('水溫與試樣差 ≤ 5 K', 'Water vs DUT ≤ 5 K'), 30, 68, {size:14});
+  } else {
+    dim(x, Rt - 40, surf + 2, Rt - 40, btop + bh, '', {color:C.water});
+    text(x, T('深度 ?', 'Depth ?'), Rt + 12, 250, {size:18, mono:true, color:C.water, w:500});
+    text(x, T('雙方協議', 'by agreement'), Rt + 12, 274, {size:14});
+    const gx = 100, gy = 170, gr = 48, ang = -Math.PI*0.75 + Math.PI*1.1 + 0.05*Math.sin(st.t*3);
+    x.beginPath(); x.arc(gx, gy, gr, 0, TAU); x.fillStyle = C.surface; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 2.5; x.stroke();
+    for (let i = 0; i <= 10; i++){ const a = -Math.PI*1.25 + i*Math.PI*0.15; x.beginPath(); x.moveTo(gx + (gr-4)*Math.cos(a), gy + (gr-4)*Math.sin(a)); x.lineTo(gx + (gr-12)*Math.cos(a), gy + (gr-12)*Math.sin(a)); x.strokeStyle = C.muted; x.lineWidth = 1.5; x.stroke(); }
+    x.beginPath(); x.moveTo(gx, gy); x.lineTo(gx + (gr-14)*Math.cos(ang - Math.PI/2), gy + (gr-14)*Math.sin(ang - Math.PI/2)); x.strokeStyle = C.water; x.lineWidth = 3; x.stroke();
+    text(x, T('水壓', 'Pressure'), gx, gy + 66, {size:14, align:'center'});
+    text(x, T('須嚴於 IPX7', 'More severe than IPX7'), 30, 40, {size:20, mono:true, color:C.water, w:500});
+    text(x, T('規格書例：1.5 m · 60 min', 'Spec example: 1.5 m · 60 min'), 30, 68, {size:14});
+  }
+}
+
+/* =========================================================
+   FIRST NUMERAL — PROBES + DUST
+   ========================================================= */
+const K = 3; // px per mm
+const WALL_X = 330, WALL_T = 30, MID = 220;
+const PROBES = {
+  sphere50:{d:50, F:50, len:0, zh:'剛性球 Ø50 mm', en:'Rigid sphere Ø50 mm'},
+  sphere12:{d:12.5, F:30, len:0, zh:'物體探棒：剛性球 Ø12.5 mm', en:'Object probe: sphere Ø12.5 mm'},
+  finger:{d:12, F:10, len:80, zh:'接近探棒：關節試驗指 Ø12 × 80 mm', en:'Access probe: jointed test finger Ø12 × 80 mm'},
+  rod:{d:2.5, F:3, len:100, zh:'鋼棒 Ø2.5 mm', en:'Steel rod Ø2.5 mm'},
+  wire:{d:1, F:1, len:100, zh:'鋼線 Ø1.0 mm', en:'Steel wire Ø1.0 mm'},
+};
+function probeJudge(kind, o, depth){
+  const P = PROBES[kind], fits = o >= P.d;
+  if (kind === 'finger') return {ok: !(fits && depth <= 80), why: !fits ? ['手指伸不進開口','Finger cannot enter the opening'] : depth <= 80 ? ['手指伸入後碰到危險部位','Finger reaches the hazardous part'] : ['可伸入，但 80 mm 內碰不到','Finger enters but cannot reach within 80 mm']};
+  if (P.len === 0) return {ok: !fits, why: fits ? ['球的全直徑穿過開口','Full sphere diameter passes through'] : ['球卡在開口外','Sphere is stopped at the opening']};
+  return {ok: !fits, why: fits ? ['探棒穿入開口','Probe penetrates the opening'] : ['探棒進不去','Probe cannot enter']};
+}
+function probeScene(n){
+  return { probe:true, draw(x, st, dt){
+    const o = st.state.open ?? 20, depth = st.state.depth ?? 60;
+    const seq = n === 2 ? ['sphere12', 'finger'] : n === 1 ? ['sphere50'] : n === 3 ? ['rod'] : ['wire'];
+    const cyc = 7, idx = Math.floor(st.t / cyc) % seq.length, lt = st.t % cyc, kind = seq[idx];
+    const P = PROBES[kind];
+    const half = o*K/2, wallIn = WALL_X + WALL_T, hz = wallIn + depth*K - WALL_T;
+    x.fillStyle = C.sunk; x.fillRect(WALL_X, 30, 450, 360);
+    x.fillStyle = C.steel; x.fillRect(WALL_X, 30, WALL_T, Math.max(0, MID - half - 30)); x.fillRect(WALL_X, MID + half, WALL_T, Math.max(0, 390 - MID - half));
+    x.fillRect(WALL_X, 30, 450, 10); x.fillRect(WALL_X, 380, 450, 10);
+    text(x, T('外殼內部', 'Inside enclosure'), 760, 60, {size:14, align:'right'});
+    const hzX = Math.min(hz, 740);
+    x.fillStyle = C.bad; x.globalAlpha = .18; x.fillRect(hzX, MID - 70, 760 - hzX, 140); x.globalAlpha = 1;
+    x.strokeStyle = C.bad; x.lineWidth = 3; x.beginPath(); for (let i = 0; i <= 14; i++){ const Y = MID - 70 + i*10; x.lineTo(hzX + (i % 2 ? 8 : 0), Y); } x.stroke();
+    text(x, T('危險部位', 'Hazardous part'), hzX + 16, MID - 86, {size:14, color:C.bad, w:700});
+    dim(x, WALL_X - 18, MID - half, WALL_X - 18, MID + half, '', {});
+    text(x, T(`開口 ${o} mm`, `Opening ${o} mm`), WALL_X - 30, MID + Math.max(half, 20) + 26, {size:15, mono:true, align:'right', color:C.ink});
+    dim(x, WALL_X, 360, hzX, 360, `${depth} mm`, {size:14});
+    const fits = o >= P.d, r = P.d*K/2;
+    const startFront = 120;
+    let stopFront;
+    if (!fits) stopFront = P.len === 0 ? WALL_X - Math.sqrt(Math.max(0, r*r - half*half)) + r : WALL_X;
+    else stopFront = Math.min(P.len ? WALL_X + P.len*K : 900, hzX);
+    const ease = u => u < 0 ? 0 : u > 1 ? 1 : u*u*(3 - 2*u);
+    const u1 = ease(lt / 2), u2 = ease((lt - 2.6) / 2);
+    const preFront = fits ? WALL_X - 2 : stopFront;
+    let front = startFront + (preFront - startFront) * u1;
+    if (fits && lt > 2.6) front = preFront + (stopFront - preFront) * u2;
+    const touching = fits && stopFront >= hzX - 0.5 && lt > 4.4;
+    x.save();
+    if (P.len === 0){
+      x.beginPath(); x.arc(front - r, MID, r, 0, TAU); x.fillStyle = C.dust; x.globalAlpha = .9; x.fill(); x.globalAlpha = 1; x.strokeStyle = C.ink; x.lineWidth = 2; x.stroke();
+      text(x, `Ø${P.d}`, front - r, MID, {size: P.d > 20 ? 18 : 13, mono:true, align:'center', color:C.surface, w:500});
+    } else if (kind === 'finger'){
+      const fr = 6*K, L1 = 80*K;
+      const bend = (touching || !fits || lt < 4.6) ? 0 : 0.6*Math.sin((lt - 4.6) * 3);
+      const sx = front - L1;
+      x.fillStyle = C.steel; x.fillRect(sx - 14, MID - 75, 14, 150);
+      x.translate(sx, MID);
+      const seg = (len, ang) => { x.rotate(ang); rr(x, 0, -fr, len*K, fr*2, fr); x.fillStyle = C.dust; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 2; x.stroke(); x.translate(len*K, 0); x.beginPath(); x.arc(0, 0, 3, 0, TAU); x.fillStyle = C.ink; x.fill(); };
+      seg(40, 0); seg(20, bend); seg(20, bend);
+      x.restore(); x.save();
+      x.fillStyle = C.steel; x.fillRect(Math.max(20, sx - 200), MID - 8, 186, 16);
+      text(x, T('止擋面 50×20', 'Stop face 50×20'), sx - 8, MID + 92, {size:13, align:'center'});
+    } else {
+      const th = Math.max(P.d*K, 2);
+      x.fillStyle = C.ink; x.fillRect(front - P.len*K, MID - th/2, P.len*K, th);
+      x.fillStyle = C.steel; x.fillRect(front - P.len*K - 70, MID - 14, 70, 28);
+      x.fillRect(front - P.len*K - 6, MID - 40, 6, 80);
+    }
+    x.restore();
+    if (lt > 1.6 && lt < 6.8){
+      const ax = Math.max(40, front - (P.len ? P.len*K + 90 : 2*r + 20));
+      x.strokeStyle = C.dust; x.fillStyle = C.dust; x.lineWidth = 4;
+      x.beginPath(); x.moveTo(ax - 60, MID); x.lineTo(ax - 12, MID); x.stroke();
+      x.beginPath(); x.moveTo(ax, MID); x.lineTo(ax - 16, MID - 9); x.lineTo(ax - 16, MID + 9); x.closePath(); x.fill();
+      text(x, `${P.F} N`, ax - 40, MID - 22, {size:18, mono:true, color:C.dust, align:'center', w:500});
+    }
+    const lx = 140, ly = 320, lit = touching;
+    x.strokeStyle = C.line; x.lineWidth = 1.5; x.setLineDash([5,4]);
+    x.beginPath(); x.moveTo(lx + 16, ly); x.lineTo(760, ly); x.lineTo(760, MID + 70); x.stroke(); x.setLineDash([]);
+    if (lit){ x.beginPath(); x.arc(lx, ly, 34, 0, TAU); x.fillStyle = C.hot; x.globalAlpha = .25; x.fill(); x.globalAlpha = 1; }
+    x.beginPath(); x.arc(lx, ly, 15, 0, TAU); x.fillStyle = lit ? C.hot : C.surface; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 2; x.stroke();
+    text(x, T('信號燈 40–50 V', 'Signal lamp 40–50 V'), lx, ly + 32, {size:13, align:'center'});
+    text(x, T(P.zh, P.en), 24, 30, {size:16, color:C.ink, w:700});
+    if (seq.length > 1) text(x, T(`步驟 ${idx+1} / 2`, `Step ${idx+1} / 2`), 24, 54, {size:14, mono:true});
+    const j = probeJudge(kind, o, depth);
+    if (lt > 4.6){
+      rr(x, 24, 76, 120, 34, 4); x.fillStyle = j.ok ? C.ok : C.bad; x.fill();
+      text(x, j.ok ? T('通過', 'PASS') : T('不通過', 'FAIL'), 84, 93, {size:16, color:C.surface, w:700, align:'center'});
+    }
+  }};
+}
+function dustScene(n){
+  return { dust:true, draw(x, st, dt){
+    const cat = n === 6 ? 1 : (st.state.cat || 1), rate = st.state.rate ?? 50;
+    let dur, vols;
+    if (cat === 2){ dur = 8; vols = 0; }
+    else if (rate >= 40){ dur = 2; vols = rate * 2; }
+    else { dur = Math.min(80 / rate, 8); vols = rate * dur; }
+    st.dur = dur;
+    const loop = 10, p = Math.min(1, (st.t % loop) / (loop - 1.5));
+    st.prog = p;
+    rr(x, 60, 30, 560, 360, 8); x.fillStyle = C['dust-soft']; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke();
+    text(x, T('粉塵艙', 'Dust chamber'), 76, 52, {size:15, color:C.dust, w:700});
+    text(x, T('滑石粉 2 kg/m³　篩孔 75 µm', 'Talc 2 kg/m³ · 75 µm sieve gap'), 76, 374, {size:14, mono:true, color:C.dust});
+    x.strokeStyle = C.steel; x.lineWidth = 10; x.beginPath(); x.moveTo(620, 340); x.lineTo(650, 340); x.lineTo(650, 70); x.lineTo(620, 70); x.stroke();
+    text(x, T('循環', 'Circ.'), 664, 205, {size:13});
+    const bx = 340, by = 220, w = 190, h = 120;
+    dut(x, bx, by, w, h, 0, ' ');
+    if (!st.init){ st.init = true; st.P = []; for (let i = 0; i < 260; i++) st.P.push({x:rand(80,600), y:rand(50,370), ph:rand(0,TAU), s:rand(.4,1)}); st.inside = []; }
+    for (const q of st.P){
+      q.ph += dt * q.s;
+      q.x += (Math.sin(q.ph + q.y/60) * 40 + 25) * dt; q.y += (Math.cos(q.ph*1.3 + q.x/80) * 40 - 8) * dt;
+      if (cat === 1){ const dx = (bx + w/2) - q.x, dy = (by - h/2 + 16) - q.y, d = Math.hypot(dx, dy); if (d < 120 && d > 0){ q.x += dx/d * 25 * dt; q.y += dy/d * 25 * dt; } }
+      if (q.x > 605) q.x = 80; if (q.x < 75) q.x = 600; if (q.y < 45) q.y = 370; if (q.y > 375) q.y = 50;
+      if (Math.abs(q.x - bx) < w/2 && Math.abs(q.y - by) < h/2) continue;
+      x.fillStyle = C.dust; x.globalAlpha = .55; x.beginPath(); x.arc(q.x, q.y, 1.8, 0, TAU); x.fill();
+    }
+    x.globalAlpha = 1;
+    if (n === 5){
+      const want = Math.floor(p * 26);
+      if (want === 0) st.inside = [];
+      while (st.inside.length < want) st.inside.push({x:rand(bx - w/2 + 14, bx + w/2 - 14), y:by + h/2 - rand(6, 14)});
+      x.fillStyle = C.dust; for (const d of st.inside){ x.beginPath(); x.arc(d.x, d.y, 2.2, 0, TAU); x.fill(); }
+    }
+    const done = p > .9;
+    const msg = !done ? T('外殼內部', 'Inside enclosure') : n === 5 ? T('少量積塵：不得影響運作與安全', 'Some dust: must not impair operation') : T('內部無可見積塵', 'No visible dust inside');
+    text(x, msg, bx, by + 4, {size:14, align:'center', color: done ? (n === 5 ? C.dust : C.ok) : C.muted, w: done ? 700 : 500});
+    if (cat === 1){
+      x.strokeStyle = C.ink; x.lineWidth = 5; x.beginPath(); x.moveTo(bx + w/2, by - h/2 + 16); x.lineTo(700, by - h/2 + 16); x.lineTo(700, 300); x.stroke();
+      rr(x, 676, 300, 48, 40, 4); x.fillStyle = C.steel; x.fill(); text(x, T('真空泵', 'Vacuum'), 700, 356, {size:13, align:'center'});
+      const gx = 738, gy = 110, gr = 34, kpa = Math.min(2, 0.4 + rate/60*1.4) * (p > 0 ? 1 : 0);
+      x.beginPath(); x.arc(gx, gy, gr, 0, TAU); x.fillStyle = C.surface; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 2; x.stroke();
+      const a = -Math.PI*1.2 + (kpa/2.5)*Math.PI*1.4;
+      x.beginPath(); x.moveTo(gx, gy); x.lineTo(gx + 26*Math.cos(a), gy + 26*Math.sin(a)); x.strokeStyle = C.bad; x.lineWidth = 3; x.stroke();
+      const am = -Math.PI*1.2 + (2/2.5)*Math.PI*1.4; x.beginPath(); x.arc(gx, gy, gr - 3, am - 0.04, am + 0.04); x.strokeStyle = C.bad; x.lineWidth = 5; x.stroke();
+      text(x, `${kpa.toFixed(1)} kPa`, gx, gy + 50, {size:14, mono:true, align:'center', color:C.ink});
+      text(x, T('上限 2 kPa', 'max 2 kPa'), gx, gy + 70, {size:12, align:'center'});
+      text(x, T(`已抽 ${(vols * p).toFixed(0)} 倍容積`, `${(vols * p).toFixed(0)} volumes drawn`), 76, 80, {size:16, mono:true, color:C.ink, w:500});
+    } else {
+      text(x, T('不接真空泵　排水孔保持打開', 'No vacuum · drain holes left open'), 76, 80, {size:15, color:C.ink});
+    }
+  }};
+}
+const S_SCENES = {1:probeScene(1), 2:probeScene(2), 3:probeScene(3), 4:probeScene(4), 5:dustScene(5), 6:dustScene(6)};
+
+/* =========================================================
+   DATA  (each text = [zh, en])
+   ========================================================= */
+const S_INFO = {
+  1:{name:'IP1X', tab:['手背','back of hand'], brief:['防手背接近；防 ≥50 mm 固體','Back of hand; solids ≥50 mm'], method:['剛性球 Ø50 mm 推向每個開口','Ø50 mm rigid sphere pushed against every opening'],
+     params:[[['探棒','Probe'],['剛性球 Ø50 (+0.05/0) mm','Rigid sphere Ø50 (+0.05/0) mm']],[['施力','Force'],['50 N ±10 %','50 N ±10 %']],[['判定','Pass if'],['全直徑不得穿過，且與危險部位保持足夠間隙','Full diameter must not pass; adequate clearance kept']]],
+     tip:['1 級的接近探棒和物體探棒是同一顆球，所以一次測完。','For level 1 the access probe and the object probe are the same sphere, so one push covers both.'], clause:'Clause 12.2, 13.2 · Table 6, 7'},
+  2:{name:'IP2X', tab:['手指','finger'], brief:['防手指接近；防 ≥12.5 mm 固體','Finger; solids ≥12.5 mm'], method:['先推 Ø12.5 mm 球，再插關節試驗指','Push the Ø12.5 mm sphere, then insert the jointed test finger'],
+     params:[[['物體探棒','Object probe'],['剛性球 Ø12.5 (+0.2/0) mm，30 N','Sphere Ø12.5 (+0.2/0) mm, 30 N']],[['接近探棒','Access probe'],['關節試驗指 Ø12 × 80 mm，10 N','Jointed test finger Ø12 × 80 mm, 10 N']],[['手指動作','Finger motion'],['兩個關節各彎到 90°，試所有姿勢','Each joint bent up to 90°, every position tried']],[['止擋面','Stop face'],['50 × 20 mm，不得穿過開口','50 × 20 mm, must not pass the opening']]],
+     tip:['手指「可以」伸進去，只要 80 mm 內碰不到危險部位就算過。把危險部位深度拉到 80 mm 以上試試看。網路上常把 30 N 當成手指的力，那其實是 12.5 mm 球的力。','The finger may go in; it passes as long as it cannot reach a hazardous part within its 80 mm length. Drag the hazard depth beyond 80 mm to see it pass. The often-quoted 30 N belongs to the 12.5 mm sphere, not the finger.'], clause:'Clause 12.2, 13.2, 15.3 · Table 5, 6, 7'},
+  3:{name:'IP3X', tab:['工具','tool'], brief:['防工具接近；防 ≥2.5 mm 固體','Tool; solids ≥2.5 mm'], method:['Ø2.5 mm 鋼棒推向每個開口','Ø2.5 mm steel rod pushed against every opening'],
+     params:[[['探棒','Probe'],['鋼棒 Ø2.5 (+0.05/0) mm，邊緣去毛邊','Steel rod Ø2.5 (+0.05/0) mm, deburred']],[['施力','Force'],['3 N ±10 %','3 N ±10 %']],[['判定','Pass if'],['不得穿入，且保持足夠間隙','Shall not penetrate; adequate clearance kept']]],
+     tip:['從 3 級開始是「不得穿入」，跟 1、2 級的「不得完全穿過」不同。','From level 3 on the rule is “shall not penetrate”, stricter than “shall not fully penetrate” for levels 1 and 2.'], clause:'Clause 12.2, 13.2 · Table 6, 7'},
+  4:{name:'IP4X', tab:['鐵絲','wire'], brief:['防鐵絲接近；防 ≥1.0 mm 固體','Wire; solids ≥1.0 mm'], method:['Ø1.0 mm 鋼線推向每個開口','Ø1.0 mm steel wire pushed against every opening'],
+     params:[[['探棒','Probe'],['鋼線 Ø1.0 (+0.05/0) mm','Steel wire Ø1.0 (+0.05/0) mm']],[['施力','Force'],['1 N ±10 %','1 N ±10 %']],[['判定','Pass if'],['不得穿入，且保持足夠間隙','Shall not penetrate; adequate clearance kept']]],
+     tip:['5、6 級的人員防護也是用這根 1.0 mm 鋼線。','Levels 5 and 6 use the same 1.0 mm wire for protection of persons.'], clause:'Clause 12.2, 13.2 · Table 6, 7'},
+  5:{name:'IP5X', tab:['防塵','dust-protected'], brief:['防塵：可進少量，不影響運作與安全','Dust-protected: limited ingress allowed'], method:['粉塵艙，預設 Category 1（外殼抽負壓）','Dust chamber, Category 1 by default (enclosure under vacuum)'],
+     params:[[['粉末','Powder'],['滑石粉，可通過線徑 50 µm、間隙 75 µm 的方孔篩','Talc passing a square-mesh sieve: 50 µm wire, 75 µm gap']],[['用量','Amount'],['2 kg / m³ 艙體容積，同批最多用 20 次','2 kg per m³ of chamber; max 20 tests per batch']],[['抽氣','Air drawn'],['共 80 倍外殼容積，速率 ≤60 倍/h','80 enclosure volumes at ≤60 volumes/h']],[['負壓','Depression'],['≤ 2 kPa（20 mbar）','≤ 2 kPa (20 mbar)']],[['時間','Duration'],['40–60 倍/h → 2 h；不足 40 倍/h → 抽滿 80 倍或 8 h','40–60 vol/h → 2 h; below 40 → until 80 volumes or 8 h']]],
+     tip:['Category 1 是會「呼吸」的外殼：工作時發熱、停機冷卻，內部負壓把粉塵吸進去。產品標準可指定為 Category 2（不抽氣、測 8 h）。拖動抽氣速率看測試時間怎麼變。','Category 1 enclosures “breathe”: they heat up in use, cool down when off, and the internal under-pressure sucks dust in. A product standard may declare Category 2 (no vacuum, 8 h). Drag the extraction rate to see the duration change.'], clause:'Clause 13.4, 13.5'},
+  6:{name:'IP6X', tab:['塵密','dust-tight'], brief:['塵密：完全不進塵','Dust-tight: no ingress of dust'], method:['粉塵艙，一律 Category 1','Dust chamber, always Category 1'],
+     params:[[['粉末／用量','Powder / amount'],['同 IP5X','Same as IP5X']],[['抽氣','Air drawn'],['80 倍容積，≤60 倍/h，≤2 kPa','80 volumes, ≤60 vol/h, ≤2 kPa']],[['類別','Category'],['不論有無負壓，一律當 Category 1','Always Category 1, whether or not under-pressure occurs']],[['判定','Pass if'],['試後內部無可觀察到的積塵','No observable dust deposit inside after the test']]],
+     tip:['IP6X 一定要抽負壓。若無法做專用抽氣孔，就接在線材入口孔上。','IP6X always needs the vacuum. If a dedicated suction hole is impractical, connect to the cable inlet hole.'], clause:'Clause 13.4, 13.6'},
+};
+const W_INFO = {
+  1:{name:'IPX1', tab:['垂直滴水','vertical drips'], brief:['防垂直滴水','Vertically dripping water'], method:['滴水箱，試樣放在轉盤上','Drip box, enclosure on a turntable'],
+     params:[[['水量','Rate'],['1 (+0.5/0) mm/min','1 (+0.5/0) mm/min']],[['時間','Duration'],['10 min','10 min']],[['轉盤','Turntable'],['1 r/min，偏心約 100 mm','1 r/min, eccentricity ≈100 mm']],[['安裝','Mounting'],['正常使用姿態；壁掛件鎖在同尺寸木板上','Normal position; wall units fixed to a matching wooden board']]],
+     tip:['滴水箱底面要比試樣大；若較小，可分區測，每區都要淋滿規定時間。','The drip box base must be larger than the enclosure; otherwise test section by section, each for the full time.'], clause:'Clause 14.2.1 · Table 8'},
+  2:{name:'IPX2', tab:['傾斜 15°','tilted 15°'], brief:['傾斜 15° 時防垂直滴水','Dripping water, tilted up to 15°'], method:['滴水箱，轉盤不轉，試樣傾斜 4 個位置','Drip box, no rotation, enclosure in 4 tilted positions'],
+     params:[[['水量','Rate'],['3 (+0.5/0) mm/min','3 (+0.5/0) mm/min']],[['傾斜','Tilt'],['兩個互相垂直平面，各向兩側傾 15°','15° either side in two perpendicular planes']],[['時間','Duration'],['每個位置 2.5 min，共 10 min','2.5 min per position, 10 min total']]],
+     tip:['4 個位置是「兩個平面 × 左右兩側」，不是轉 4 個角度。','The four positions are two planes × two sides, not four rotation angles.'], clause:'Clause 14.2.2 · Table 8'},
+  3:{name:'IPX3', tab:['灑水','spraying'], brief:['防灑水（垂直 ±60° 內）','Spraying water (up to 60° from vertical)'], method:['擺動管 或 手持噴嘴（依產品標準選擇）','Oscillating tube or hand-held spray nozzle (per product standard)'],
+     params:[[['擺動管水量','Tube flow'],['每孔 0.07 L/min ±5 % × 孔數','0.07 L/min ±5 % per hole × holes']],[['擺動管','Tube'],['噴孔在中心兩側 60° 弧內，擺動 ±60°，約 4 s/往返，半徑 ≤1600 mm，距試樣 ≤200 mm','Holes over ±60° arc, oscillates ±60°, ≈4 s per cycle, R ≤1600 mm, ≤200 mm from enclosure']],[['擺動管時間','Tube duration'],['5 min → 試樣轉 90° → 再 5 min','5 min → turn enclosure 90° → 5 min']],[['手持噴嘴','Spray nozzle'],['10 L/min ±5 %，50–150 kPa，裝配重遮板','10 L/min ±5 %, 50–150 kPa, shield fitted']],[['噴嘴時間','Nozzle duration'],['1 min/m²，至少 5 min','1 min/m², minimum 5 min']]],
+     tip:['下方切換「擺動管 / 手持噴嘴」。擺動管總水量依管半徑查 Table 9，R=600 mm 只有 1.8 L/min，遠小於手持噴嘴的 10 L/min。','Switch between tube and nozzle below. Tube flow comes from Table 9: at R = 600 mm it is only 1.8 L/min, far less than the nozzle’s 10 L/min.'], clause:'Clause 14.2.3 · Table 8, 9', modes:true},
+  4:{name:'IPX4', tab:['潑水','splashing'], brief:['防潑水（任何方向）','Splashing water from any direction'], method:['擺動管 或 手持噴嘴','Oscillating tube or hand-held spray nozzle'],
+     params:[[['擺動管','Tube'],['噴孔布滿 180°，擺動近 ±180°，約 12 s/往返','Holes over full 180°, oscillates ≈±180°, ≈12 s per cycle']],[['擺動管時間','Tube duration'],['10 min','10 min']],[['支架','Support'],['打孔，避免擋住下方來水','Perforated so it does not act as a baffle']],[['手持噴嘴','Spray nozzle'],['拆掉遮板，從所有可行方向噴，10 L/min','Shield removed, all practicable directions, 10 L/min']],[['噴嘴時間','Nozzle duration'],['1 min/m²，至少 5 min','1 min/m², minimum 5 min']]],
+     tip:['擺動管擺到下半圈時，水是從下往上噴，所以支架要打孔。','When the tube swings below, water sprays upward, which is why the support is perforated.'], clause:'Clause 14.2.4 · Table 8, 9', modes:true},
+  5:{name:'IPX5', tab:['噴水','water jets'], brief:['防噴水','Water jets'], method:['標準噴水嘴，從所有可行方向噴','Standard hose nozzle from all practicable directions'],
+     params:[[['噴嘴內徑','Nozzle bore'],['6.3 mm','6.3 mm']],[['水量','Flow'],['12.5 L/min ±5 %','12.5 L/min ±5 %']],[['距離','Distance'],['2.5–3 m','2.5–3 m']],[['水柱核心','Jet core'],['2.5 m 處約 Ø40 mm','≈Ø40 mm at 2.5 m']],[['時間','Duration'],['1 min/m²，至少 3 min','1 min/m², minimum 3 min']]],
+     tip:['水壓不是規定值，而是調到能達到 12.5 L/min。','Pressure is not specified; it is adjusted to deliver 12.5 L/min.'], clause:'Clause 14.2.5 · Table 8'},
+  6:{name:'IPX6', tab:['強力噴水','powerful jets'], brief:['防強力噴水','Powerful water jets'], method:['標準噴水嘴，從所有可行方向噴','Standard hose nozzle from all practicable directions'],
+     params:[[['噴嘴內徑','Nozzle bore'],['12.5 mm','12.5 mm']],[['水量','Flow'],['100 L/min ±5 %','100 L/min ±5 %']],[['距離','Distance'],['2.5–3 m','2.5–3 m']],[['水柱核心','Jet core'],['2.5 m 處約 Ø120 mm','≈Ø120 mm at 2.5 m']],[['時間','Duration'],['1 min/m²，至少 3 min','1 min/m², minimum 3 min']]],
+     tip:['流量是 IPX5 的 8 倍。通過 IPX6 即涵蓋 IPX1～IPX5。','Eight times the IPX5 flow. Passing IPX6 covers IPX1–IPX5.'], clause:'Clause 14.2.6 · Table 8'},
+  7:{name:'IPX7', tab:['暫時浸水','temporary immersion'], brief:['防暫時浸水','Temporary immersion'], method:['浸水槽，依製造商指定的使用姿態完全浸入','Immersion tank, fully immersed in the service position'],
+     params:[[['高度 < 850 mm','Height < 850 mm'],['最低點在水面下 1 m','Lowest point 1 m below surface']],[['高度 ≥ 850 mm','Height ≥ 850 mm'],['最高點在水面下 0.15 m','Highest point 0.15 m below surface']],[['時間','Duration'],['30 min','30 min']],[['水溫','Water temp.'],['與試樣溫差 ≤ 5 K','Within 5 K of the equipment']]],
+     tip:['切換試樣高度，看深度規則怎麼變。只標 IPX7 的外殼，標準視為不適合承受 IPX5／IPX6 水柱。','Switch the enclosure height to see the depth rule change. An enclosure marked only IPX7 is considered unsuitable for IPX5/IPX6 jets.'], clause:'Clause 14.2.7 · Table 8', tall:true},
+  8:{name:'IPX8', tab:['持續浸水','continuous immersion'], brief:['防持續浸水','Continuous immersion'], method:['浸水槽，條件由雙方協議','Immersion tank, conditions by agreement'],
+     params:[[['深度／時間','Depth / time'],['製造商與使用者協議','Agreed between manufacturer and user']],[['原則','Principle'],['必須比 IPX7 嚴苛，並考慮長期浸水','More severe than IPX7, reflecting continuous immersion']],[['產品標準','Product standard'],['若產品標準有規定則依其規定','Takes precedence if it defines the test']]],
+     tip:['IPX8 沒有固定數值。規格書只寫 IPX8 卻沒寫深度與時間，等於沒有資訊。','IPX8 has no fixed values. A datasheet that says IPX8 without depth and time tells you nothing.'], clause:'Clause 14.2.8 · Table 8'},
+  9:{name:'IPX9', tab:['高溫高壓','hot high-pressure'], brief:['防高溫高壓噴水','High-pressure, high-temperature jets'], method:['扇形噴嘴，小件放轉盤、大件依實際安裝','Fan-jet nozzle; small items on a turntable, large items as installed'],
+     params:[[['水溫','Water temp.'],['80 ±5 °C','80 ±5 °C']],[['水量','Flow'],['15 ±1 L/min','15 ±1 L/min']],[['距離','Distance'],['175 ±25 mm','175 ±25 mm']],[['小件 (<250 mm)','Small (<250 mm)'],['轉盤 5 ±1 r/min，0°/30°/60°/90° 各 30 s','Turntable 5 ±1 r/min, 0°/30°/60°/90° × 30 s']],[['大件 (≥250 mm)','Large (≥250 mm)'],['從所有可行方向盡量垂直噴，1 min/m²，至少 3 min','All practical directions, near-perpendicular, 1 min/m², min 3 min']],[['驗證','Verification'],['以衝擊力量測裝置確認噴流分佈（Fig. 10、11）','Jet impact-force distribution checked (Fig. 10, 11)']]],
+     tip:['IPX9 是 A2:2013 新增的等級，和車用 ISO 20653 的 IPX9K 參數不同，不可直接互換。動畫中 4 個位置僅示意角度分布，0° 的基準方向以標準 Figure 12 為準。','IPX9 was added in A2:2013 and differs from the automotive IPX9K of ISO 20653; they are not interchangeable. The four positions in the animation are schematic; see Figure 12 of the standard for the 0° reference.'], clause:'Clause 14.2.9 · Table 8'},
+};
+const GENERAL_W = ['進水不得影響運作或安全、不得沉積在絕緣件上造成爬電、不得碰到帶電部位或繞組、不得積在線材端。允許進水量由產品標準規定；內部凝結的露水不算進水。','Any water that enters must not impair operation or safety, deposit on insulation where it could cause tracking along creepage distances, reach live parts or windings, or accumulate near the cable end. The permitted amount is set by the product standard; internal condensation does not count as ingress.'];
+
+/* =========================================================
+   UI: stages
+   ========================================================= */
+const stS = new Stage($('cvS')), stW = new Stage($('cvW'));
+let curS = 2, curW = 7;
+const L = a => B(a[0], a[1]);
+
+function buildTabs(el, info, max, onPick){
+  el.innerHTML = '';
+  for (let i = 1; i <= max; i++){
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tab'; b.setAttribute('role','tab'); b.id = el.id + i;
+    b.innerHTML = `<b>${info[i].name}</b><span>${L(info[i].tab)}</span>`;
+    b.addEventListener('click', () => onPick(i));
+    el.appendChild(b);
+  }
+}
+function specHTML(info, extra){
+  return `<p class="eyebrow">${info.name}</p><h3>${L(info.brief)}</h3><div class="method">${L(info.method)}</div>
+    <dl>${info.params.map(([k,v]) => `<dt>${L(k)}</dt><dd>${v[0] === v[1] ? v[0] : L(v)}</dd>`).join('')}</dl>
+    ${extra || ''}
+    <div class="box"><strong>${Bi('重點','Key point')}</strong>${L(info.tip)}</div>
+    <p class="clause">${info.clause}</p>`;
+}
+function playLabel(st, btn){ btn.innerHTML = st.playing ? Bi('暫停','Pause') : Bi('▶ 播放動畫','▶ Play'); btn.dataset.paused = st.playing ? '' : '1'; }
+function setSolid(n){
+  curS = n; stS.reset(); stS.state = {open: stS._open ?? 20, depth: stS._depth ?? 60, cat: 1, rate: 50};
+  stS.scene = S_SCENES[n]; stS.init = false;
+  [...$('solidTabs').children].forEach((b, i) => b.setAttribute('aria-selected', String(i + 1 === n)));
+  const ctl = $('ctlS');
+  if (n <= 4){
+    ctl.innerHTML = `<label for="sOpen">${Bi('開口尺寸','Opening')} <input type="range" id="sOpen" min="0.5" max="60" step="0.5" value="${stS.state.open}"><span class="val" id="sOpenV">${stS.state.open} mm</span></label>
+      <label for="sDepth">${Bi('危險部位深度','Hazard depth')} <input type="range" id="sDepth" min="20" max="140" step="5" value="${stS.state.depth}"><span class="val" id="sDepthV">${stS.state.depth} mm</span></label>
+      <button class="play" id="playS2" type="button"></button>`;
+    $('sOpen').addEventListener('input', e => { stS.state.open = stS._open = +e.target.value; $('sOpenV').textContent = e.target.value + ' mm'; stS.t = 0; updSolidSpec(); if (!stS.playing) settle(stS); });
+    $('sDepth').addEventListener('input', e => { stS.state.depth = stS._depth = +e.target.value; $('sDepthV').textContent = e.target.value + ' mm'; stS.t = 0; updSolidSpec(); if (!stS.playing) settle(stS); });
+    $('progS').hidden = true;
+    playLabel(stS, $('playS2'));
+    $('playS2').addEventListener('click', () => togglePlay(stS, $('playS2')));
+  } else {
+    ctl.innerHTML = (n === 5 ? `<span>${Bi('外殼類別','Category')}</span><span class="seg" id="catSeg"><button type="button" data-v="1" aria-pressed="true">${Bi('Cat. 1 抽負壓','Cat. 1 vacuum')}</button><button type="button" data-v="2" aria-pressed="false">${Bi('Cat. 2 不抽','Cat. 2 none')}</button></span>` : `<span>${Bi('IP6X 一律 Category 1','IP6X is always Category 1')}</span>`) +
+      `<label for="sRate">${Bi('抽氣速率','Extraction rate')} <input type="range" id="sRate" min="10" max="60" step="5" value="50"><span class="val" id="sRateV">50 /h</span></label>`;
+    $('progS').hidden = false;
+    $('sRate').addEventListener('input', e => { stS.state.rate = +e.target.value; $('sRateV').textContent = e.target.value + ' /h'; stS.t = 0; stS.init = false; updSolidSpec(); if (!stS.playing) settle(stS); });
+    if (n === 5) $('catSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      stS.state.cat = +b.dataset.v; $('catSeg').querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+      $('sRate').disabled = stS.state.cat === 2; stS.t = 0; stS.init = false; updSolidSpec(); if (!stS.playing) settle(stS); }));
+  }
+  updSolidSpec();
+  if (!stS.playing) settle(stS);
+}
+function solidVerdict(n){
+  const o = stS.state.open, d = stS.state.depth;
+  if (n <= 4){
+    const kinds = n === 1 ? ['sphere50'] : n === 2 ? ['sphere12','finger'] : n === 3 ? ['rod'] : ['wire'];
+    const rows = kinds.map(k => ({k, ...probeJudge(k, o, d)}));
+    const all = rows.every(r => r.ok);
+    return `<div class="verdict ${all ? 'pass' : 'fail'}"><b>${all ? Bi('通過','PASS') : Bi('不通過','FAIL')}</b>
+      <div class="row">${Bi(`開口 ${o} mm・危險部位深 ${d} mm`, `opening ${o} mm · hazard at ${d} mm`)}</div>
+      ${rows.map(r => `<div class="row">${r.ok ? '✓' : '✗'} ${B(PROBES[r.k].zh + '：' + r.why[0], PROBES[r.k].en + ': ' + r.why[1])}</div>`).join('')}</div>`;
+  }
+  const s = stS.state; let txt;
+  if (n === 5 && s.cat === 2) txt = B('不接真空泵，排水孔保持打開，測 <b>8 h</b>。','No vacuum, drain holes open, run for <b>8 h</b>.');
+  else if (s.rate >= 40) txt = B(`抽氣速率 ${s.rate} 倍/h 落在 40–60 倍/h → 測 <b>2 h</b>，共抽 ${s.rate * 2} 倍容積。`, `${s.rate} volumes/h is within 40–60 → test lasts <b>2 h</b>, ${s.rate * 2} volumes drawn.`);
+  else { const t80 = 80 / s.rate; txt = t80 <= 8 ? B(`抽氣速率 ${s.rate} 倍/h 不足 40 → 持續抽到 80 倍容積，需 <b>${t80.toFixed(1)} h</b>。`, `${s.rate} volumes/h is below 40 → continue until 80 volumes, <b>${t80.toFixed(1)} h</b>.`) : B(`抽氣速率 ${s.rate} 倍/h 太低 → 到 <b>8 h</b> 上限停止，只抽到 ${s.rate * 8} 倍容積。`, `${s.rate} volumes/h is too low → stop at the <b>8 h</b> limit with only ${s.rate * 8} volumes.`); }
+  return `<div class="verdict calc"><b>${Bi('測試時間怎麼算','How long the test runs')}</b><div class="row">${txt}</div></div>`;
+}
+function updSolidSpec(){ $('specS').innerHTML = specHTML(S_INFO[curS], solidVerdict(curS)); }
+
+function setWater(n){
+  curW = n; stW.reset(); stW.state = {mode:'tube', tall:false}; stW.scene = W_SCENES[n];
+  [...$('waterTabs').children].forEach((b, i) => b.setAttribute('aria-selected', String(i + 1 === n)));
+  const info = W_INFO[n], ctl = $('ctlW');
+  let h = '';
+  if (info.modes) h += `<span>${Bi('試具','Apparatus')}</span><span class="seg" id="modeSeg"><button type="button" data-v="tube" aria-pressed="true">${Bi('擺動管','Tube')}</button><button type="button" data-v="nozzle" aria-pressed="false">${Bi('手持噴嘴','Nozzle')}</button></span>`;
+  if (info.tall) h += `<span>${Bi('試樣高度','Height')}</span><span class="seg" id="tallSeg"><button type="button" data-v="0" aria-pressed="true">&lt; 850 mm</button><button type="button" data-v="1" aria-pressed="false">≥ 850 mm</button></span>`;
+  if (!h) h = `<span>${L(info.method)}</span>`;
+  ctl.innerHTML = h;
+  if (info.modes) $('modeSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { stW.state.mode = b.dataset.v; stW.P = []; $('modeSeg').querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b))); if (!stW.playing) settle(stW); }));
+  if (info.tall) $('tallSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { stW.state.tall = b.dataset.v === '1'; $('tallSeg').querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b))); if (!stW.playing) settle(stW); }));
+  $('specW').innerHTML = specHTML(info, `<div class="box"><strong>${Bi('判定（14.3）','Acceptance (14.3)')}</strong>${L(GENERAL_W)}</div>`);
+  if (!stW.playing) settle(stW);
+}
+// paused stage: advance a little so the still frame shows the test in action
+function settle(st){ const keep = st.t; st.P = []; st.init = false; st.t = Math.max(keep, 0); for (let i = 0; i < 300; i++){ st.t += 0.016; st.render(0.016); } }
+function togglePlay(st, btn){ st.playing = !st.playing; playLabel(st, btn); }
+$('playS').addEventListener('click', () => togglePlay(stS, $('playS')));
+$('playW').addEventListener('click', () => togglePlay(stW, $('playW')));
+
+/* ---------- main loop ---------- */
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  for (const st of [stS, stW]) if (st.playing && st.visible){ st.t += dt; st.render(dt); }
+  const sc = W_SCENES[curW], pw = (stW.t % sc.loop) / sc.loop;
+  $('barW').style.width = (pw * 100).toFixed(1) + '%';
+  $('timeW').textContent = `${fmt(pw * sc.total)} / ${fmt(sc.total)}　${T('加速','speed-up')} ${Math.round(sc.total / sc.loop)}×`;
+  if (curS >= 5 && stS.dur){ const p = stS.prog || 0; $('barS').style.width = (p * 100).toFixed(1) + '%'; $('timeS').textContent = `${fmt(p * stS.dur * 3600)} / ${fmt(stS.dur * 3600)}`; }
+  requestAnimationFrame(frame);
+}
+
+/* =========================================================
+   NAMEPLATE DECODER
+   ========================================================= */
+let d1 = '6', d2 = '7';
+const NONE = ['無防護','Non-protected'], XNOTE = ['未宣告（不需標示時以 X 代替）','Not specified (X replaces an unused numeral)'];
+function plate(){
+  $('pd1').textContent = d1; $('pd2').textContent = d2;
+  $('m1').innerHTML = d1 === 'X' ? L(XNOTE) : d1 === '0' ? L(NONE) : L(S_INFO[d1].brief);
+  let w = d2 === 'X' ? L(XNOTE) : d2 === '0' ? L(NONE) : null;
+  if (!w){ const n = +d2, b = W_INFO[n].brief;
+    const add = n >= 7 ? ['（不自動涵蓋 IPX5／IPX6 噴水）',' (does not cover IPX5/IPX6 jets)'] : n >= 2 ? [`（涵蓋 IPX1～IPX${n - 1}）`, ` (covers IPX1–IPX${n - 1})`] : ['',''];
+    w = B(b[0] + add[0], b[1] + add[1]); }
+  $('m2').innerHTML = w;
+  document.querySelectorAll('#row1 .dbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === d1)));
+  document.querySelectorAll('#row2 .dbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === d2)));
+}
+function digitRow(el, list, on){
+  list.forEach(v => { const b = document.createElement('button'); b.type = 'button'; b.className = 'dbtn'; b.textContent = v; b.dataset.v = v; b.addEventListener('click', () => on(v)); el.appendChild(b); });
+}
+digitRow($('row1'), ['X','0','1','2','3','4','5','6'], v => { d1 = v; plate(); if (+v >= 1) setSolid(+v); });
+digitRow($('row2'), ['X','0','1','2','3','4','5','6','7','8','9'], v => { d2 = v; plate(); if (+v >= 1) setWater(+v); });
+
+/* =========================================================
+   DUAL CODING
+   ========================================================= */
+function dual(){
+  const c = k => $('c' + k).checked;
+  const jet = c(6) ? 6 : c(5) ? 5 : 0, imm = c(8) ? 8 : c(7) ? 7 : 0, nine = c(9);
+  const parts = []; if (jet) parts.push('IPX' + jet); if (imm) parts.push('IPX' + imm); if (nine) parts.push('IPX9');
+  const tag = $('dualTag'), t = $('dualText');
+  if (!parts.length){ $('dualMark').textContent = '—'; tag.className = 'tag n'; tag.innerHTML = Bi('尚未選擇','Nothing selected'); t.innerHTML = B('勾選至少一項測試。','Tick at least one test.'); return; }
+  $('dualMark').textContent = parts.join(' / ');
+  if (imm && (jet || nine)){ tag.className = 'tag v'; tag.innerHTML = Bi('通用','Versatile'); t.innerHTML = B('同時能承受水柱與浸水。' + (c(5) && c(6) ? ' 已勾 IPX5 與 IPX6，只需標 IPX6（6 涵蓋 5）。' : ''), 'Suitable for both water jets and immersion.' + (c(5) && c(6) ? ' IPX5 and IPX6 both ticked: mark IPX6 only (6 covers 5).' : '')); }
+  else if (imm){ tag.className = 'tag r'; tag.innerHTML = Bi('限定','Restricted'); t.innerHTML = B(`只適合浸水，標準視為不適合承受 IPX5／IPX6 水柱。若產品會被沖洗，還要加測噴水並雙重標示，例如 IPX6/IPX${imm}。`, `Suitable for immersion only; considered unsuitable for IPX5/IPX6 jets. If the product will be hosed down, add a jet test and dual-code it, e.g. IPX6/IPX${imm}.`); }
+  else if (nine && !jet){ tag.className = 'tag r'; tag.innerHTML = Bi('限定','Restricted'); t.innerHTML = B('只證明能承受所測的高溫高壓噴水條件。IPX9 不往下涵蓋 IPX1～IPX6。','Proves only the tested high-pressure, high-temperature jet conditions. IPX9 does not cover IPX1–IPX6.'); }
+  else { tag.className = 'tag n'; tag.innerHTML = Bi('未宣告浸水','No immersion claim'); t.innerHTML = B(`IPX${jet} 涵蓋 IPX1～IPX${jet - 1}，但不代表能浸水。` + (nine ? ' 另加 IPX9 表示也能承受高溫高壓噴水。' : ''), `IPX${jet} covers IPX1–IPX${jet - 1} but says nothing about immersion.` + (nine ? ' Adding IPX9 also covers hot high-pressure jets.' : '')); }
+}
+document.querySelectorAll('#dualChecks input').forEach(i => i.addEventListener('change', dual));
+
+/* ---------- reference table ---------- */
+const REF = [
+  ['grp', ['第一位數（探棒施力 ±10 %）','First numeral (probe force ±10 %)']],
+  ['1', ['剛性球 Ø50 mm','Rigid sphere Ø50 mm'], '50 N', ['—','—'], ['不得完全穿過，與危險部位保持足夠間隙','Must not fully pass; adequate clearance']],
+  ['2', ['剛性球 Ø12.5 mm；關節試驗指 Ø12 × 80 mm','Sphere Ø12.5 mm; jointed finger Ø12 × 80 mm'], ['球 30 N；試驗指 10 N','sphere 30 N; finger 10 N'], ['—','—'], ['球不得完全穿過；手指可伸入 80 mm 但須保持間隙','Sphere must not fully pass; finger may enter 80 mm with clearance']],
+  ['3', ['鋼棒 Ø2.5 mm','Steel rod Ø2.5 mm'], '3 N', ['—','—'], ['不得穿入','Shall not penetrate']],
+  ['4', ['鋼線 Ø1.0 mm','Steel wire Ø1.0 mm'], '1 N', ['—','—'], ['不得穿入','Shall not penetrate']],
+  ['5', ['粉塵艙，預設 Category 1（抽負壓）','Dust chamber, Category 1 by default'], ['滑石粉 2 kg/m³，篩孔 75 µm；80 倍容積，≤60 倍/h，≤2 kPa','Talc 2 kg/m³, 75 µm gap; 80 volumes, ≤60 vol/h, ≤2 kPa'], ['2 h（40–60 倍/h）至 8 h','2 h (40–60 vol/h) up to 8 h'], ['可進少量，不影響運作與安全','Limited ingress, no harm to operation or safety']],
+  ['6', ['粉塵艙，一律 Category 1','Dust chamber, always Category 1'], ['同 IP5X','Same as IP5X'], ['同上','Same'], ['內部無可見積塵','No visible dust inside']],
+  ['grp', ['附加字母（只用於人員防護，探棒與施力同上表）','Additional letters (protection of persons only; same probes and forces)']],
+  ['A / B', ['Ø50 mm 球／關節試驗指','Ø50 mm sphere / jointed test finger'], ['50 N／10 N','50 N / 10 N'], ['—','—'], ['保持足夠間隙；試驗指可伸入 80 mm，止擋面 50×20 mm 不得穿過','Adequate clearance; finger may enter 80 mm, 50×20 mm stop face must not pass']],
+  ['C / D', ['Ø2.5 mm 鋼棒／Ø1.0 mm 鋼線，長 100 mm','Ø2.5 mm rod / Ø1.0 mm wire, 100 mm long'], ['3 N／1 N','3 N / 1 N'], ['—','—'], ['可全長伸入，但止擋面不得穿過，且保持足夠間隙','May enter full length; stop face must not pass; adequate clearance']],
+  ['grp', ['第二位數（清水，水溫與試樣溫差 ≤5 K）','Second numeral (fresh water, within 5 K of the equipment)']],
+  ['X1', ['滴水箱＋轉盤','Drip box + turntable'], ['1 (+0.5/0) mm/min；轉盤 1 r/min，偏心約 100 mm','1 (+0.5/0) mm/min; 1 r/min, ≈100 mm eccentricity'], ['10 min','10 min'], 'ACC'],
+  ['X2', ['滴水箱，傾斜 15°','Drip box, tilted 15°'], ['3 (+0.5/0) mm/min；4 個傾斜位置','3 (+0.5/0) mm/min; 4 tilt positions'], ['4 × 2.5 min','4 × 2.5 min']],
+  ['X3', ['擺動管 或 手持噴嘴（裝遮板）','Oscillating tube or spray nozzle (shield on)'], ['管：0.07 L/min/孔，擺 ±60°，約 4 s/往返，距試樣 ≤200 mm；噴嘴：10 L/min，50–150 kPa','Tube: 0.07 L/min/hole, ±60°, ≈4 s/cycle, ≤200 mm away; nozzle: 10 L/min, 50–150 kPa'], ['管 5+5 min；噴嘴 1 min/m²，≥5 min','Tube 5+5 min; nozzle 1 min/m², ≥5 min']],
+  ['X4', ['擺動管 或 手持噴嘴（拆遮板）','Oscillating tube or spray nozzle (shield off)'], ['管：孔布滿 180°，擺近 ±180°，約 12 s/往返','Tube: holes over 180°, ≈±180°, ≈12 s/cycle'], ['管 10 min；噴嘴 1 min/m²，≥5 min','Tube 10 min; nozzle 1 min/m², ≥5 min']],
+  ['X5', ['噴水嘴 Ø6.3 mm','Hose nozzle Ø6.3 mm'], ['12.5 L/min ±5 %；2.5–3 m；核心約 Ø40 mm','12.5 L/min ±5 %; 2.5–3 m; core ≈Ø40 mm'], ['1 min/m²，≥3 min','1 min/m², ≥3 min']],
+  ['X6', ['噴水嘴 Ø12.5 mm','Hose nozzle Ø12.5 mm'], ['100 L/min ±5 %；2.5–3 m；核心約 Ø120 mm','100 L/min ±5 %; 2.5–3 m; core ≈Ø120 mm'], ['1 min/m²，≥3 min','1 min/m², ≥3 min']],
+  ['X7', ['浸水槽','Immersion tank'], ['高 <850 mm：最低點在水下 1 m；≥850 mm：最高點在水下 0.15 m','<850 mm tall: lowest point 1 m deep; ≥850 mm: highest point 0.15 m deep'], ['30 min','30 min']],
+  ['X8', ['浸水槽','Immersion tank'], ['雙方協議，須嚴於 IPX7','By agreement, more severe than IPX7'], ['協議','Agreed']],
+  ['X9', ['扇形噴嘴','Fan-jet nozzle'], ['15 ±1 L/min；80 ±5 °C；175 ±25 mm；小件轉盤 5 ±1 r/min，4 個角度','15 ±1 L/min; 80 ±5 °C; 175 ±25 mm; small items on 5 ±1 r/min turntable, 4 angles'], ['小件 30 s/位置；大件 1 min/m²，≥3 min','Small: 30 s per position; large: 1 min/m², ≥3 min']],
+];
+const cell = v => typeof v === 'string' ? v : (v[0] === v[1] ? v[0] : L(v));
+$('refBody').innerHTML = REF.map(r => {
+  if (r[0] === 'grp') return `<tr class="grp"><td colspan="5">${L(r[1])}</td></tr>`;
+  const acc = r[4] === 'ACC' ? `<td rowspan="9">${L(GENERAL_W)}</td>` : r[4] ? `<td>${L(r[4])}</td>` : '';
+  return `<tr><td class="n">${r[0]}</td><td>${cell(r[1])}</td><td class="m">${cell(r[2])}</td><td>${cell(r[3])}</td>${acc}</tr>`;
+}).join('');
+
+/* ---------- Table 9 ---------- */
+const T9 = [[200,8,.56,12,.84],[400,16,1.1,25,1.8],[600,25,1.8,37,2.6],[800,33,2.3,50,3.5],[1000,41,2.9,62,4.3],[1200,50,3.5,75,5.3],[1400,58,4.1,87,6.1],[1600,67,4.7,100,7.0]];
+$('t9').innerHTML = T9.map(r => `<tr><td>${r[0]} mm</td><td>${r[1]}</td><td>${r[2]} L/min</td><td>${r[3]}</td><td>${r[4]} L/min</td></tr>`).join('');
+
+/* ---------- glossary ---------- */
+const GL = [
+  ['Degree of protection','防護等級'],['Enclosure','外殼'],['First / second characteristic numeral','第一／第二特徵數字'],['Additional letter (A–D)','附加字母'],['Supplementary letter (H, M, S)','補充字母'],
+  ['Hazardous part','危險部位'],['Access probe','接近探棒'],['Object probe','物體探棒'],['Jointed test finger','關節試驗指'],['Stop face','止擋面'],['Adequate clearance','足夠間隙'],
+  ['Dust-protected / Dust-tight','防塵／塵密'],['Talcum powder','滑石粉'],['Depression (under-pressure)','負壓'],['Extraction rate','抽氣速率'],
+  ['Drip box','滴水箱'],['Turntable','轉盤'],['Oscillating tube','擺動管'],['Hand-held spray nozzle','手持噴嘴'],['Counterbalanced shield','配重遮板'],['Hose nozzle','噴水嘴'],['Fan-jet nozzle','扇形噴嘴'],
+  ['Temporary / continuous immersion','暫時／持續浸水'],['Ingress of water','進水'],['Tracking along creepage distances','沿爬電距離的漏電起痕'],['Drain hole','排水孔'],['Type test','型式試驗'],['Product standard','產品標準'],['Versatile / Restricted','通用／限定用途'],
+];
+$('glossBox').innerHTML = GL.map(([en, zh]) => `<div><b>${en}</b><span>${zh}</span></div>`).join('');
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+const QZ = [
+  {q:['一支標示 IP67 的手機，可以拿高壓水柱沖洗嗎？','Can an IP67 phone be cleaned with a water jet?'], o:[['可以，7 比 6 高，自動涵蓋','Yes, 7 is higher than 6 so it is covered'],['不一定，IPX7 不涵蓋 IPX5／IPX6 噴水','Not necessarily: IPX7 does not cover IPX5/IPX6 jets'],['可以，只要水溫低於 35 °C','Yes, as long as the water is below 35 °C']], a:1, why:['IPX7、IPX8 不往下涵蓋噴水。要宣告兩者都能承受，必須雙重標示，例如 IP66/IP67。','IPX7 and IPX8 do not cover jets. Claiming both requires dual coding, e.g. IP66/IP67.']},
+  {q:['IP6X 粉塵測試時，外殼要不要接真空泵抽負壓？','Does an IP6X dust test put the enclosure under vacuum?'], o:[['看外殼會不會呼吸，Category 2 不必抽','Depends: Category 2 needs no vacuum'],['一律視為 Category 1，要抽，負壓 ≤2 kPa','Always Category 1: yes, at ≤2 kPa'],['不抽，只要放 8 小時','No, just leave it in for 8 h']], a:1, why:['13.6.1：IP6X 不論是否真有負壓，一律當 Category 1。IP5X 才可由產品標準指定 Category 2。','13.6.1: IP6X is always Category 1. Only IP5X may be declared Category 2 by a product standard.']},
+  {q:['IPX3 用半徑 600 mm 的擺動管測試，總水量是多少？','IPX3 with a 600 mm radius oscillating tube: what is the total flow?'], o:[['10 L/min','10 L/min'],['12.5 L/min','12.5 L/min'],['1.8 L/min（25 孔 × 0.07 L/min）','1.8 L/min (25 holes × 0.07 L/min)']], a:2, why:['Table 9：每孔 0.07 L/min，R=600 mm 時 IPX3 有 25 個孔。10 L/min 是手持噴嘴法。','Table 9: 0.07 L/min per hole, 25 holes at R = 600 mm. 10 L/min is the hand-held nozzle.']},
+  {q:['一台高 1.2 m 的機櫃做 IPX7，應該泡多深？','A 1.2 m tall cabinet is tested to IPX7. How deep does it go?'], o:[['最低點在水下 1 m','Lowest point 1 m below the surface'],['最高點在水下 0.15 m','Highest point 0.15 m below the surface'],['整台泡到水下 1.2 m','Entirely 1.2 m under water']], a:1, why:['高度 ≥850 mm 的外殼，最高點在水面下 0.15 m；小於 850 mm 的才是最低點在水下 1 m。','For enclosures 850 mm or taller the highest point is 0.15 m deep; the 1 m rule applies to shorter ones.']},
+  {q:['IP2X 的關節試驗指，推入開口的力是多少？','What force is applied with the IP2X jointed test finger?'], o:[['10 N','10 N'],['30 N','30 N'],['50 N','50 N']], a:0, why:['Table 6：試驗指 10 N。30 N 是 IP2X 物體探棒 Ø12.5 mm 球的力，50 N 是 Ø50 mm 球。','Table 6: the finger uses 10 N. 30 N is for the Ø12.5 mm sphere, 50 N for the Ø50 mm sphere.']},
+  {q:['IPX5 和 IPX6 的差別主要在哪裡？','What mainly separates IPX5 from IPX6?'], o:[['距離不同','The distance'],['噴嘴與流量：Ø6.3 mm／12.5 L/min vs Ø12.5 mm／100 L/min','Nozzle and flow: Ø6.3 mm / 12.5 L/min vs Ø12.5 mm / 100 L/min'],['水溫不同','The water temperature']], a:1, why:['兩者距離都是 2.5–3 m、都是 1 min/m² 至少 3 min，差在噴嘴內徑與流量（8 倍）。','Both use 2.5–3 m and 1 min/m² (min 3 min); they differ in nozzle bore and flow (8×).']},
+];
+let score = 0;
+const cl = a => a[0] === a[1] ? a[0] : L(a);
+$('quizBox').innerHTML = QZ.map((z, i) => `<div class="q" id="q${i}"><p>${i + 1}. ${L(z.q)}</p><div class="opts">${z.o.map((o, j) => `<button type="button" id="q${i}o${j}" data-q="${i}" data-o="${j}">${cl(o)}</button>`).join('')}</div><div class="why" hidden id="w${i}">${L(z.why)}</div></div>`).join('');
+$('quizBox').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const i = +b.dataset.q, j = +b.dataset.o, z = QZ[i], box = $('q' + i);
+  if (box.dataset.done) return; box.dataset.done = '1';
+  box.querySelectorAll('button').forEach((o, k) => { if (k === z.a) o.classList.add('right'); else if (k === j) o.classList.add('wrong'); });
+  if (j === z.a) score++;
+  $('w' + i).hidden = false; $('score').textContent = `${score} / ${QZ.length}`;
+});
+
+/* ---------- language switch ---------- */
+function setLang(v){
+  LANG = v; root.dataset.lang = v; root.lang = v === 'en' ? 'en' : 'zh-Hant';
+  try { localStorage.setItem('ip-lab-lang', v); } catch(e){}
+  document.querySelectorAll('#langSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  for (const st of [stS, stW]) if (!st.playing) settle(st);
+}
+document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.v)));
+
+/* ---------- init ---------- */
+buildTabs($('solidTabs'), S_INFO, 6, setSolid);
+buildTabs($('waterTabs'), W_INFO, 9, setWater);
+playLabel(stS, $('playS')); playLabel(stW, $('playW'));
+plate(); dual();
+setLang(LANG);
+setSolid(2); setWater(7);
+$('jumpS').addEventListener('click', () => setSolid(+d1 >= 1 ? +d1 : 2));
+$('jumpW').addEventListener('click', () => setWater(+d2 >= 1 ? +d2 : 7));
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
