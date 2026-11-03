@@ -426,7 +426,7 @@ function Stage(canvas){
   };
   this.resize();
   new ResizeObserver(() => { this.resize(); if (!this.playing) this.render(0); }).observe(canvas);
-  if ('IntersectionObserver' in window) new IntersectionObserver(es => { this.visible = es[0].isIntersecting; }).observe(canvas);
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { this.visible = es[es.length - 1].isIntersecting; }).observe(canvas);
 }
 Stage.prototype.render = function(dt){
   const x = this.ctx; x.clearRect(0,0,this.W,this.H); x.fillStyle = C.surface; x.fillRect(0,0,this.W,this.H);
@@ -983,13 +983,17 @@ $('playW').addEventListener('click', () => togglePlay(stW, $('playW')));
 /* ---------- main loop ---------- */
 let last = performance.now();
 function frame(now){
-  const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  for (const st of [stS, stW]) if (st.playing && st.visible){ st.t += dt; st.render(dt); }
+  requestAnimationFrame(frame);   // schedule first so one bad frame never stops the loop
+  // the first rAF timestamp can be earlier than `last` (mobile browsers): never let time run backwards
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);
+  for (const st of [stS, stW]) if (st.playing && st.visible){
+    st.t += dt;
+    try { st.render(dt); } catch (e) { console.error(e); st.P = []; }
+  }
   const sc = W_SCENES[curW], pw = (stW.t % sc.loop) / sc.loop;
   $('barW').style.width = (pw * 100).toFixed(1) + '%';
   $('timeW').textContent = `${fmt(pw * sc.total)} / ${fmt(sc.total)}　${T('加速','speed-up')} ${Math.round(sc.total / sc.loop)}×`;
   if (curS >= 5 && stS.dur){ const p = stS.prog || 0; $('barS').style.width = (p * 100).toFixed(1) + '%'; $('timeS').textContent = `${fmt(p * stS.dur * 3600)} / ${fmt(stS.dur * 3600)}`; }
-  requestAnimationFrame(frame);
 }
 
 /* =========================================================
