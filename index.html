@@ -410,7 +410,6 @@ function readColors(){
 readColors();
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(readColors, 30)); } catch(e){}
 new MutationObserver(() => setTimeout(readColors, 30)).observe(root, {attributes:true, attributeFilter:['data-theme','class','style']});
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = id => document.getElementById(id);
 const TAU = Math.PI * 2, D2R = Math.PI / 180;
 const rand = (a,b) => a + Math.random() * (b - a);
@@ -419,7 +418,7 @@ const fmt = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s/3600),
 /* ---------- canvas stage ---------- */
 function Stage(canvas){
   this.c = canvas; this.ctx = canvas.getContext('2d'); this.W = 800; this.H = 420;
-  this.t = 0; this.P = []; this.playing = !reduce; this.visible = true; this.state = {};
+  this.t = 0; this.P = []; this.playing = true; this.visible = true; this.state = {};
   this.resize = () => {
     const w = this.c.clientWidth || 800, dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.c.width = Math.round(w * dpr); this.c.height = Math.round(w * this.H / this.W * dpr);
